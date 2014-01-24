@@ -8,6 +8,7 @@
 \usepackage{color, colortbl}
 \usepackage{subfigure}
 %\usepackage{showkeys}
+\usepackage{listings}
 
 \newcommand{\todo}[2]{\textcolor{magenta}{#1: #2}}
 
@@ -33,7 +34,7 @@
 %\LGapproved % activate only if approved
 \LGdraft
 
-\LGversion{Alpha 0.4}
+\LGversion{Beta 0.7}
 %\LGstaffmonths{Resources spent on the deliverable}
 
 %\LGdistribution{WP leaders, PMB members, European Commission}
@@ -101,7 +102,11 @@
 \LGaddhistory{0.2}{2014-01-06}{Added section on topic modeling}{Christoph Kling}
 \LGaddhistory{0.3}{2014-01-07}{Revised Outline}{Heinrich Hartmann}
 \LGaddhistory{0.4}{2014-01-07}{Alpha Version}{Heinrich Hartmann}
-
+\LGaddhistory{0.5}{2014-01-21}{Added section on Service Line
+  Detection}{Christoph Schaefer}
+\LGaddhistory{0.6}{2014-01-22}{Added section on Distributed Geo Matching}{Daniel Janke}
+\LGaddhistory{0.7}{2014-01-24}{Added description of Sensor
+  Collector}{Heinrich Hartmann}
 \end{LGhistory}
 
 
@@ -252,19 +257,7 @@ result transmissions to the application server.
 
 \clearpage
 \chapter{Sensor Collection Service}
-\todo{HH}{Add content}
-
-Explain the improvements of the sensor collection service since D1.1
-
-In particular cover the topics:
-\begin{enumerate}
-\item Improved Architecture Description
-\item Inspection Front End
-\item New Sensor Transfer File Format
-\item New Streaming API
-\item Integration Loging and Heartbeating into Upload Servlet
-\item Data Collection event in Koblenz
-\end{enumerate}
+\input{sections/SensorCollector}
 
 \chapter{Reality Mining Methods}
 
