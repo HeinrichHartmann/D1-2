@@ -7,12 +7,12 @@ recognition ('HAR') component on the mobile device.  The algorithmic
 foundation of this data mining task have been described in detail in
 deliverable D2.2 in section 3.2 ``Mobile Sensing and activity
 recognition''. We include a brief summary here (\ref{sec:har_method})
-for the sake of completeness. In subsection \ref{sec:har_eval} we
-evaluate our method to the on two data sets and compare it to the
-state of the art approaches.
+for the sake of completeness. Subsection \ref{sec:har_component}
+contains the descriptions of the implementation. In subsection
+\ref{sec:har_eval} we evaluate our method to the on two data sets and
+compare it to the state of the art approaches.
 
 \subsection{HAR Method Summary}\label{sec:har_method}
-
 
 The process of activity recognition uses a pipeline of signal
 processing and machine learning techniques. It consists of two phases:
@@ -45,13 +45,15 @@ Both phases rely on the preprocessing steps of "windowing'' and
 ``feature generation''. The stream of incoming sensor data is divided into
 time windows of fixed size (typically 1-10 sec.) and for each window
 a set of features is computed. This features are filtering out
-relevant information from the raw signal. 
+relevant information from the raw signal. Typical features include
+mean values and standard deviations as well as frequency domain
+features like Fourier modes.
 
-Deliverable D2.2 contains detailed lists of all sensors and features,
-that are used in the literature as well as the performance of the
-trained classifiers.
+Deliverable D2.2 contains detailed lists of all sensors and features
+and data mining methods that are used in the literature as well as
+discussions of quality of the recognition results.
 
-\subsection{Component Description}
+\subsection{Component Description}\label{sec:har_component}
 
 Architecture Description.
 
@@ -83,28 +85,51 @@ Architecture Description.
 
 \subsection{Evaluation}\label{sec:har_eval}
 
-We have evaluated our classifier on two different datasets.  One was
-gathered in Koblenz at a data collection event held in December 2013.
+We have evaluated our classifier on two different datasets.
+
+The first dataset was gathered on the University Campus in Koblenz in
+December 2013.  It contains a total of around $900K$ samples collected
+by $10$ volunteers.  The volunteers were instructed to perform the
+activities ''walking'', ''running'', ''stairs'' and ''cycling'' on
+predefined routes on the university campus (cf. Figure
+\ref{fig:data_collection_handout}). The total time effort per
+volunteer was about 20-25minutes and a financial reward was offered as
+an incentive. After the recording the samples have been inspected
+using our inspection tool and the beginning and ending of the
+activities were manually selected in order to avoid noise from holding
+the device in the hand.
+
+%
+% [TODO: Publication of Dataset!]
+%
+
 The other dataset was obtained from the {\it UCI Machine Learning
   Repository}\footnote{\url{http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones}}
 and was gathered by Davide Anguita, et. al. \cite{Anguita} in 2012.
+It contains around $700K$ collected by 30 volunteers.
 
-Basic Statistics:
+The number of samples per activity of both datasets are summarized in
+Figure \ref{fig:har_datasets}. Both datasets contain only
+accelerometer samples, and have been preprocessed that have been
+sampled at a fixed rate of $50Hz$.
+
 \begin{figure}
 \centering
-\begin{tabular}{|l|c|c|} \hline
+\begin{tabular}{|l|r|r|} \hline
 Activity  & UCI Dataset & UKOB Dataset \\ \hline
-sitting   & 113728      & 80951        \\
-standing  & 121984      & 320737       \\
-walking   & 110208      & 292024       \\
-running   & 0           & 31916        \\
-cycling   & 0           & 436106       \\
-stairs    & 188800      & 30086        \\
-lying     & 124416      & 0            \\ \hline
+sitting   & 113.728     & 80.951        \\
+standing  & 121.984     & 320.737       \\
+walking   & 110.208     & 292.024       \\
+running   & 0           & 31.916        \\
+cycling   & 0           & 436.106       \\
+stairs    & 188.800     & 30.086        \\
+lying     & 124.416     & 0            \\ \hline \hline
+Totals    & 659.136     & 903.156       \\ \hline
 \end{tabular}
-\caption{Number of samples by activity and dataset.}
-\end{figure}
 
+\caption{Number of accelerometer samples by activity and dataset.}
+\label{fig:har_datasets}
+\end{figure}
 
 \begin{figure}[htbp]
 \centering
@@ -113,21 +138,9 @@ lying     & 124416      & 0            \\ \hline
 \end{figure}
 
 
-
-
-
-Comparison of our classifier with literature on the basis of external
-data sets.
-
-
-
-% Describe:
-% * Dataset from UKOB
-% * Dataset from UCI
 %
-% * Feature Sets
-
-
+% TODO: Describe Evaluation Results
+%
 
 
 %%% Local Variables:
