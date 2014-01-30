@@ -1,20 +1,10 @@
 %--------------------------------------------------------------------
 % \chapter{Sensor Collection Service}
 %--------------------------------------------------------------------
-
+\label{chap:SensorCollection}
 % Problems with earlier implementation:
 % 1. Bad performance in field trial. Irregularities in data
 % 2. Not cross platform
-
-% Improved Sensor Collection Architecture:
-% * Performance improvements
-% * Better exchange format
-% * Simpler design / Extendability
-% * Improved Data Inspection Front End
-% * More Flexibility to add HAR as a service
-% * Integration into Service Center
-% * Removed dependency on external lib
-
 
 % In particular cover the topics:
 % \begin{enumerate}
@@ -28,17 +18,59 @@
 
 
 \section{Mobile Sensor Collector}
+\label{sec:SensorColllection}
 
-The revised sensor collector follows the following architecture
-(Figure \ref{fig:sc_architecture}).
-
-\begin{figure}[htbp]
+\begin{figure}
 \centering
 \includegraphics[width=\textwidth]{img/sc/sc_architecture.jpg}
 \caption{Sensor Collection Architecture}\label{fig:sc_architecture}
 \end{figure}
 
-The architecture consists of the following components:
+In this deliverable we present the a revised sensor collection
+component. It offers the following improvements over the last version
+presented in D1.1:
+\begin{itemize}
+\item High performance recordings on Low-End devices. During the field
+  trial some low-end devices showed difficulties to record the sensor
+  samples with sufficient frequency. We streamlined the architecture
+  in order to reduced the overhead caused by the processing of the
+  samples. In this process we removed dependency on external SDCF
+  library, and reimplemented core parts of the component.
+\item Improved battery awareness. Power consumption in the sensor
+  collection process is largely driven the GPS sensor. In May 2013
+  Google released a new location API, that takes advantage of multiple
+  location provider and reduces the power consumption significantly.
+  The revised component makes use of this new API, and offers a
+  fallback in case the service is not supported by the device.
+\item Revised export format. We have improved the data exchange
+  formats used for publishing samples to other components and storage
+  on the central server. In section \ref{sec:ssf} we specify the
+  ssf-Sensor Stream Format, which is inspired by the
+  \href{http://en.wikipedia.org/wiki/Common\_Log\_Format}{Common Log
+    Format} used by many webservers. It allows easy human inspection
+  and processing by standard (UNIX) tools like ``grep'' and ``sed''
+  while being reasonably memory efficient.
+\item Streaming API. The streaming API is a new communication channel
+  between the mobile sensor collector and the central server. It
+  allows to transfer the incoming sensor data directly to the server
+  using the ssf format.
+\item Integration into Live+Gov Service Center. The revised sensor
+  collector and sensor storage service is compatible with the Live+Gov
+  service center. This feature allows central user management as well
+  as health monitoring and centralized log aggregation of the services.
+\item Seamless Extendability. The revised architecture can be easily
+  extended by further stream processing components. This is realized
+  by a dispatcher thread that distributes sensor samples to registered
+  components over a simple interface (again using ssf). Implemented
+  extensions include the Human Activity Recognition component
+  (c.f. section \ref{sec:HAR}) and a GPS-sample publisher component
+  that is used by the Service Line Detection service (cf. section
+  \ref{sec:SLD}).
+\end{itemize}
+
+The new architecture is sketched in Figure \ref{fig:sc_architecture}.
+It consists of the following components:
+
 \begin{itemize}
 \item {\bf Sensor Event Thread}. The sensor event thread registers
   callback listeners for all configured sensors. When sensor events
@@ -58,18 +90,17 @@ The architecture consists of the following components:
 \item {\bf TransferThread}. The transfer thread is an independent
   thread that transfers the persisted samples to the Live+Gov Servers.
 \item {\bf Monitoring Thread}. The monitoring thread polls the
-  different components and gathers run-time information like numbers of
-  processed samples or transfer state.
+  different components and gathers run-time information like numbers
+  of processed samples or transfer state.
 \item {\bf Service Controller}. The service controller starts and
   stops all running threads, and takes care of proper configuration of
   all services. It listens to Intents specified in the API and changes
   the state of the service accordingly.
 \end{itemize}
 
+
 The following table summarizes all supported sensors:
 
-\begin{table}[ht]
-\centering
 \begin{tabular}{|l|p{0.7\linewidth}|}
   \hline
   Sensor & Description \\
@@ -79,10 +110,6 @@ The following table summarizes all supported sensors:
                         If available, the GPS samples are gathered via
                         Google's new Play Services location
                         provider\footnote{https://developer.android.com/google/play-services/location.html}.
-                        The advantages of this library for our use case are: the instant
-                        availability of the last known location and a significant decrease
-                        of power consumption, since several location providers (e.g. using
-                        Wifi) are fused together.  
                         
                         If the Play Services are not available, the service falls back to
                         accessing the GPS samples directly.
@@ -121,13 +148,9 @@ The following table summarizes all supported sensors:
   \\
   \hline
 \end{tabular}
-\caption{Sensors recorded in the Live+Gov sensor collection app}
-\label{SensorsOfLGCollectionApp}
-\end{table}
+
 
 \subsection{Intent API}
-
-
 \label{subsubsec:IntentAPIdescription}
 
 The communication with other Live+Gov toolkit components is
@@ -200,7 +223,7 @@ accelerometer samples.
 \caption{Sensor Collection Architecture}\label{fig:sc_gui}
 \end{figure}
 
-\subsection{Sensor Stream File Format}\label{sec:ssf}
+\subsection{Sensor Stream Format -- ``SSF''}\label{sec:ssf}
 This document describes the sensor stream format ({\it ssf}) which is used for
 transfering sensor values from a mobile device (or another sensor
 source) to the Live+Gov data-base. The file format is inspired by the
