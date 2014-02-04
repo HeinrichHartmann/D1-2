@@ -64,11 +64,73 @@ Architecture Description.
 \caption{Classification Architecture}\label{fig:classification_architecture}
 \end{figure}
 
+\begin{itemize}
+  \item \texttt{SAMPLE PRODUCER} The samples chosen to be used to train the 
+    classifier are present in a csv file. Because of reuseablitiy the file hase 
+    to be imported line by line so it is possible to reuse the whole streaming
+    pipeline, which is already in place for the mobile device.
+  \item \texttt{WINDOW PRODUCER} Since the classification of the current 
+    activity uses a timeframe, the window producer groups them together. It
+    allows different window sizes and overlaps.
+  \item \texttt{INTERPOLATION \& QUALITY CHECK} To remove frequency disparity 
+    and ignore timeframes below a set sample frequency a quality check is in 
+    place. After the check, all windows get standardized to a constant frequency
+    using interpolation between the data points.
+  \item \texttt{FEATURE CALCULATION} The classification runs on different 
+    features extraced from the windows (cf. \ref{sec:har_features}).
+  \item \texttt{CSV-PERSISTOR} For further processing of the calculated data
+    it is required to be store. This is done using a simple CSV data format,
+    to ensure cross program importability.
+\end{itemize}
+
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{img/har/integration.jpg}
 \caption{Integrated HAR Architecture}\label{fig:integrated_har}
 \end{figure}
+
+\begin{itemize}
+  \item \texttt{SENSOR EVENT THREAD} The sensor collector is connected to nearly
+    all sensors available on the device. The samples get pushed into a queue to 
+    keep the calculation time needed for each sensor event at a minimum.
+  \item \texttt{DISPATCHER THREAD} This thread distributes the sensor samples to
+    each connected component like the persistor or the human activity 
+    recognition.
+  \item \texttt{HAR PIPELINE} The pipeline reuses most parts described in 
+    \ref{fig:classification_architecture}. The difference here is the fully 
+    trained classifier, which trys to identify the current activity.
+  \item \texttt{INTENT BROADCASTER} After the classifier recognised an activity,
+    it gets broadcasted using an intent.
+\end{itemize}
+
+
+\subsection{Features}\label{sec:har_features}
+
+\begin{itemize}
+  \item Mean of each individual axis
+  \item Variance of each individual axis
+  \item Mean of standard deviation
+  \item Variance of standard deviation
+  \item Bin distribution of standard deviation
+  \item Bin distribution of frequency domain
+  \item Device tilting angle
+  \item Energy
+  \item Kurtosis
+\end{itemize}
+
+
+\subsection{Classifier Training}\label{sec:har_classifier_training}
+
+The first step is separating the data set into a train and test set. Here we 
+used data from different users for each activity. After both data sets got 
+processed by the classification architecture (cf. Figure \ref{fig:classification_architecture})
+the training and test set get imported into {\it Weka}\footnote{\url{http://www.cs.waikato.ac.nz/ml/weka/}}.
+Weka comes with build in machine learning algorithms to choose from. Here the 
+J48 implementation of the C4.5 algorithm is used to create a decision tree out 
+of the provided training set. The test set is used to validate the created tree
+and calculate the accuracy and confusion matrix. Since Weka allows to export 
+the created tree as Java class, it is possible to integrate the output directly 
+into the HAR Pipeline.
 
 % TODO CE
 % Describe the component implementation.
