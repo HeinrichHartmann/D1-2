@@ -13,6 +13,25 @@ contains the descriptions of the implementation. In subsection
 \ref{sec:har_eval} we evaluate our method to the on two data sets and
 compare it to the state of the art approaches.
 
+Despite several attempts to port the component to other mobile
+platforms we have not been able to do so, due to technical
+difficulties which where hard to anticipate. As described in
+deliverable D1.1 it was planned to implement this component using the
+Appcelerator Titanium\footnote{\url{http://www.appcelerator.com/}}
+framework. Moreover, several viability checks were presented. In the
+first prototypes
+\footnote{\url{https://github.com/HeinrichHartmann/LiveGovWP1/tree/master/mobile/TitaniumSensorCollector}}
+it turned out, that it is not possible to collect sensor data while
+running in the background with Titanium. This feature is clearly
+required for an integrated activity recognition library which shall be
+used in the field trials.
+
+As stated in D1.1 foresees, we propose independent native
+implementation as fallback solution in this case. So far we have a
+running implementation for Android and Blackberry. An iPhone port is
+planned, once the implementation is more stable.
+
+
 \subsection{HAR Method Summary}\label{sec:har_method}
 
 The process of activity recognition uses a pipeline of signal

@@ -2,29 +2,9 @@
 % \chapter{Sensor Collection Service}
 %--------------------------------------------------------------------
 \label{chap:SensorCollection}
-% Problems with earlier implementation:
-% 1. Bad performance in field trial. Irregularities in data
-% 2. Not cross platform
-
-% In particular cover the topics:
-% \begin{enumerate}
-% \item Improved Architecture Description
-% \item Inspection Front End
-% \item New Sensor Transfer File Format
-% \item New Streaming API
-% \item Integration Loging and Heartbeating into Upload Servlet
-% \item Data Collection event in Koblenz
-% \end{enumerate}
-
 
 \section{Mobile Sensor Collector}
 \label{sec:SensorColllection}
-
-\begin{figure}
-\centering
-\includegraphics[width=\textwidth]{img/sc/sc_architecture.jpg}
-\caption{Sensor Collection Architecture}\label{fig:sc_architecture}
-\end{figure}
 
 In this deliverable we present the a revised sensor collection
 component. It offers the following improvements over the last version
@@ -34,8 +14,11 @@ presented in D1.1:
   trial some low-end devices showed difficulties to record the sensor
   samples with sufficient frequency. We streamlined the architecture
   in order to reduced the overhead caused by the processing of the
-  samples. In this process we removed dependency on external SDCF
-  library, and reimplemented core parts of the component.
+  samples. For example, we traded the convenience of a SQL database in
+  favor of the performance benefits of a flat file solution.  Also, in
+  this process we removed dependency on external SDCF
+  library\footnote{\url{http://www.sdcf.eu/}}, and reimplemented core
+  parts of the component.
 \item Improved battery awareness. Power consumption in the sensor
   collection process is largely driven the GPS sensor. In May 2013
   Google released a new location API, that takes advantage of multiple
@@ -68,8 +51,16 @@ presented in D1.1:
   \ref{sec:SLD}).
 \end{itemize}
 
+\subsection{Architecture Description}
+
 The new architecture is sketched in Figure \ref{fig:sc_architecture}.
 It consists of the following components:
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{img/sc/sc_architecture.jpg}
+\caption{Sensor Collection Architecture}\label{fig:sc_architecture}
+\end{figure}
 
 \begin{itemize}
 \item {\bf Sensor Event Thread}. The sensor event thread registers
@@ -88,19 +79,21 @@ It consists of the following components:
   predefined file. Also a variant with zip-file compression is
   included.
 \item {\bf TransferThread}. The transfer thread is an independent
-  thread that transfers the persisted samples to the Live+Gov Servers.
+  thread that transfers the persisted samples to the Live+Gov servers.
 \item {\bf Monitoring Thread}. The monitoring thread polls the
   different components and gathers run-time information like numbers
   of processed samples or transfer state.
 \item {\bf Service Controller}. The service controller starts and
-  stops all running threads, and takes care of proper configuration of
-  all services. It listens to Intents specified in the API and changes
-  the state of the service accordingly.
+  stops all threads, and takes care of proper configuration of all
+  services. It listens to intents specified in the API and changes the
+  state of the service accordingly.
 \end{itemize}
 
+The supported sensors are summarized in Table
+\ref{fig:sensor_table}. They are unchanged from D1.1.
 
-The following table summarizes all supported sensors:
-
+\begin{figure}
+\centering
 \begin{tabular}{|l|p{0.7\linewidth}|}
   \hline
   Sensor & Description \\
@@ -148,55 +141,58 @@ The following table summarizes all supported sensors:
   \\
   \hline
 \end{tabular}
-
+\caption{Supported sensors of the Sensor Collector}
+\label{fig:sensor_table}
+\end{figure}
 
 \subsection{Intent API}
 \label{subsubsec:IntentAPIdescription}
 
 The communication with other Live+Gov toolkit components is
 facilitated through the exchange intent
-messages\footnote{\url{http://developer.android.com/guide/components/intents-filters.html}}. 
-The API was slightly improved since deliverable D1.1. New intents are
-marked with an asterisk (*).
+messages\footnote{\url{http://developer.android.com/guide/components/intents-filters.html}}.
+The API was slightly improved since deliverable D1.1. We removed the
+explicit ``Start/Stop Service'' intents, since the service now shuts
+down automatically when no services are requested. The following list
+summarizes all provided intent controls. New intents are marked with
+an asterisk (*).
 
-The following API-calls are implemented.
 \begin{itemize}
-\item {\bfseries Start/Stop Service.} Starts and stops the sensor
-  collector service. Samples can only be recorded, or transmitted when
-  the service is running.
 \item {\bfseries Start/Stop Recording.} Starts and stops recording of
-  sensor samples.
+  sensor samples. Samples are persisted in a local sensor file.
+\item {\bfseries Delete Samples.*} Delete all stored samples on the
+  device.
 \item {\bf Send Annotation.} This intent allows users to annotate
   their recording by a string value that will be recorded by a
   ``tag-sensor''.
-\item {\bfseries Enable/Disable sample storage.} Samples are stored in
-  a local database, of variable size. If Disabled samples can still be
-  broadcasted to the system.
-\item {\bfseries Enable/Disable continues sample transfer.} Controls
-  the sample transfer state machine. When enabled and a network
-  connection is available sensor samples are transfered in batches to
-  the server backend.
-\item {\bfseries Transfer samples.} Triggers the sample transfer.
+\item {\bfseries Enable/Disable Streaming*.} When enabled, all
+  collected sensor samples are streamed over to a central server over
+  the network. See section \ref{sec:straming} for more details.
+\item {\bfseries Transfer samples.}  Controls the sample transfer
+  state machine. When enabled and a network connection is available
+  sensor samples are transferred in batches to the server backend.
 \item {\bfseries Enable/Disable sample broadcast.} When enabled all
   recorded sensor samples are broadcasted in the form of intents into
   the system. This allows other components, e.g. feature extraction
   and context mining, to make use of the recorded sensor data.
 \item {\bfseries Request Status Report.} When this intent is received
-  a status report is broadcasted to the system.
-\item {\bfseries Tag sample.}  Annotations by users are realized as
-  ``Tag sample''.  The content of this intents is included as
-  ``tag''-sensor in the recording.
+  a status report is broadcasted to the system. A summary of returned
+  information is shown in Figure \ref{tab:StatusIntent}.
+\item {\bfseries Set user ID.*} Set the user id to a given value. This
+  intent is used to connect the mining results to the user data in the
+  Live+Gov service center.
+\item {\bfseries Get GPS samples.*} Returns a summary of the latest
+  GPS samples gathered by the system in ssf format. It is intended to
+  be used by the service line detection service described in Section \ref{sec:SLD}.
 \end{itemize}
 
 When a control intent is received by the component, the appropriate
 action is taken. After execution has finished a status report intent
 is broadcasted to the system which provides information about whether
-the requested method call was successful (cf. Table
-\ref{tab:StatusIntent}).  Further technical description of the
-component and the API are included in D4.1.
+the requested method call was successful. Further technical
+description of the component and the API are included in D4.1.
 
-% Status intents contain the following information:
-\begin{table}[ht]
+\begin{figure}[ht]
 \centering
 \begin{tabular}{|l|l|l|} \hline
    Key       & Type    & Description                                       \\ \hline
@@ -208,44 +204,50 @@ component and the API are included in D4.1.
 \end{tabular}
 \caption{Structure of status intents}
 \label{tab:StatusIntent}
-\end{table}
+\end{figure}
 
-The sensor sample broadcast intent contains a unique device
-identifier, a timestamp and serialized sample data in XML
-format. Figure \ref{fig:XMLSamples} shows two examples for GPS and
-accelerometer samples.
+\subsection*{Component Testing}
 
-\subsection{Testing GUI}
+The sensor collector comes accompanied with a testing GUI shown in
+Figure \ref{fig:sc_gui}, that provides buttons for the implemented
+intent controls API. The returned status information is displayed in
+the form of plain text logs, button states and spinners.
 
-\begin{figure}[htbp]
+The GUI can be used to test the functionality of the component and for
+the gathering of training data.
+
+In addition we provide automated unit-test cases for the intent API
+along with the source code.
+
+
+\begin{figure}[h]
 \centering
 \includegraphics[width=0.3 \textwidth]{img/sc/sc_gui.png}
 \caption{Sensor Collection Architecture}\label{fig:sc_gui}
 \end{figure}
 
-\subsection{Sensor Stream Format -- ``SSF''}\label{sec:ssf}
-This document describes the sensor stream format ({\it ssf}) which is used for
-transfering sensor values from a mobile device (or another sensor
-source) to the Live+Gov data-base. The file format is inspired by the
+\subsection{Sensor Stream Format (ssf)}\label{sec:ssf}
+The sensor stream format ({\it ssf}) which is used for transfering
+sensor values from a mobile device (or another sensor source) to the
+Live+Gov data-base. The file format is inspired by the
 \href{http://en.wikipedia.org/wiki/Common\_Log\_Format}{Common Log
-  Format} used by many webservers. We view incoming sensor values as
-events and record them as a simple stream of CSV-rows. Each sensor has
-an individual prefix but writes into the same file.
+  Format} used by many webservers. It replaces the XML-based format
+used in D1.1. We view incoming sensor values as events and record them
+as a simple stream of CSV-rows. Each sensor has an individual prefix
+but writes into the same file.
 
 The key advantages of this format as opposed to the previously used
 XML format are:
 \begin{itemize}
 \item Human readability. The format is easy to understand by humans.
-\item Statelessness. Every line can be interpreted without the context
+\item Flexibility. Every line can be interpreted without the context
   of the file. Therefore ssf-files can be arbitrarily sliced,
   concatenated and filtered using UNIX tools like {\it grep, cat, sed,
     awk}.
-\item Streaming. Lines can be individually transferred over tcp
+\item Streaming support. Lines can be individually transferred over tcp
   sockets or messaging systems. Allowing immediate inspection of the
   recorded samples on a remote system.
 \end{itemize}
-
-\subsubsection*{Format Description}
 
 The rows of the ssf-format have the following structure:
 \small
@@ -253,9 +255,6 @@ The rows of the ssf-format have the following structure:
 SENSOR_PREFIX,TIME_STAMP, USER_ID, SENSOR_VALUES
 \end{verbatim}
 \normalsize
-
-
-The authorative source for the field descriptions is the source code.
 
 \begin{itemize}
 \item \texttt{SENSOR PREFIX}. Identifies the sensor producing the
@@ -266,33 +265,32 @@ The authorative source for the field descriptions is the source code.
   (Wifi networks), \texttt{BLT} (Bluetooth), \texttt{GSM} (GSM cells),
   \texttt{ACT} (Google Play Services Activity), \texttt{ERR} (Error
   Value), \texttt{TAG} (Annotations entered by the user).
-\item \texttt{TIME STAMP} UNIX timestamp in milliseconds e.g. \texttt{1377609577214}
+\item \texttt{TIME STAMP} UNIX timestamp in milliseconds
+  e.g. \texttt{1377609577214}
 \item \texttt{USER ID} ID that identifies records from the same
   user. The default value is the device-id that is provided by
   Android.
-\item \texttt{SENSOR VALUES} 
-  Sensor values in individual formats. In order to adhere to the CSV
-  standard no \texttt{,}-symbol and new-lines may be used in this field.
+\item \texttt{SENSOR VALUES} Sensor values in individual formats. In
+  order to adhere to the CSV standard no \texttt{,}-symbol and
+  new-lines may be used in this field.
   \begin{itemize}
-  \item \texttt{ACC/GYR/MAG/LAC/GRA} X,Y,Z-values separated by space characters.
+  \item \texttt{ACC/GYR/MAG/LAC/GRA} x,y,z-values separated by space characters.
   \item \texttt{GPS} lat,lon,alt-values separated by space characters
   \item \texttt{ACT} Activity Name, Confidence separated by space characters.
   \item \texttt{WIFI} List of access-points, where each visible
-    accesspoint is separated by a \texttt{;} and written as
-
-    Escaped SSID String/Escaped BSSID String/Frequency in MHz/RSSI in dBm
+    accesspoint is separated by a \texttt{;} and written as \\
+    {\it Escaped SSID String/Escaped BSSID String/Frequency in MHz/RSSI in dBm}
   \item \texttt{BLT}
     List of devices where each visible device is separated by a \texttt{;}
-    and written as
-    Escaped Address/Device Major Class/Device Class/Bond
-    State/Optional Escaped Name/Optional RSSI
+    and written as \\
+    { \it Escaped Address/Device Major Class/Device Class/Bond
+      State/Optional Escaped Name/Optional RSSI }
   \item \texttt{GSM}
     The state of the device written as Service State/Roaming State/Manual
     Carrier Selection State/Escaped Carrier Name/Escaped Signal Strength
-
     followed by \texttt{:}, followed by a possibly empty list of cells,
-    where each cell is separated by a \texttt{;} and written as
-    Escaped Cell Identity/Cell Type/RSSI in dBm
+    where each cell is separated by a \texttt{;} and written as: \\
+    {\it Escaped Cell Identity/Cell Type/RSSI in dBm}
   \end{itemize}
 \end{itemize}
 
@@ -301,82 +299,103 @@ Example rows may look as follows:
 \begin{verbatim}
 ACC,1377605748123,5,0.9813749 0.0021324 0.0142523
 GPS,1377605748156,5,50.32124 25.2453 136.5335
-WIFI,1341244415,wifiUser,"WiFi AP"/"00:12:42"/2412/-45; "Another WiFi AP"/"33:13:53"/2437/-56
+WIFI,1341244415,wifiUser,"WiFi AP"/"00:12:42"/2412/-45; \\
+                  "Another WiFi AP"/"33:13:53"/2437/-56
 TAG,1378114981049,anotherUser,"test tag"
-BLT,1385988380374,bluetoothUser,"C8:F7:33:B7:B5:B4"/computer/computer laptop/bonded/"LAPTOP"/-46
+BLT,1385988380374,bluetoothUser,"C8:F7:33:B7:B5:B4" \\
+                  /computer/computer laptop/bonded/"LAPTOP"/-46
 \end{verbatim}
 \normalsize
 
-\subsection{Streaming Service}
+\subsection{Streaming Service}\label{sec:straming}
 
 The revised version of the sensor collector includes a streaming
 service, that transfers recorded samples directly to a remote machine.
-
 The streaming service uses the ZeroMQ networking
 library\footnote{http://www.zeromq.org} to transfer single ssf lines
 to the Live+Gov machine running a streaming server. The streaming
 server appends the received samples to a file (zmq\_stream.ssf).
 
 This simple service allows direct monitoring of the recorded samples,
-via simple UNIX command line tools, e.g. 
-\begin{verbatim} 
-tail -f zmq_stream.ssf 
-\end{verbatim}
-prints the recoded samples to the console.
-\begin{verbatim} 
-tail -f zmq_stream.ssf | grep ^GPS 
-\end{verbatim} 
-filters out gps samples. And finally
-\begin{verbatim} 
-tail -f zmq_stream.ssh | cut --delimiter=',' --field=1 | logtop  
-\end{verbatim}
+via simple UNIX command line tools. 
+\begin{itemize}
+\item \texttt{tail -f zmq\_stream.ssf} - prints the recoded samples to the console.
+\item \texttt{tail -f zmq\_stream.ssf | grep GPS} - filters out GPS samples.
+\item \texttt{tail -f zmq\_stream.ssf | cut --delimiter=',' --field=1 | logtop}\\
+  shows the frequencies of the individual incoming sensor values.
+\end{itemize}
 
-shows the frequencies of the individual incoming sensor values.
+\section{Sensor Storage Service}
 
-\section{Sensor Storage Service Architecture}
+The sensor storage service runs on the Live+Gov servers and stores the
+sensor samples collected by the mobile sensor collection component.
+The storage component offers a HTTP/REST interface to upload sensor
+data upload available at
+\url{http://141.26.71.84:8080/UploadServlet/}.  The uploaded samples
+are stored in a PostgreSQL\footnote{http://www.postgresql.org/}
+database with PostGIS\footnote{http://postgis.net/} plugin for Geo
+queries.
 
-\begin{figure}[htbp]
+The architecture is sketched in \ref{fig:ss_architecture}. It consists
+of the following components.
+\begin{itemize}
+\item {\bf Request Handler.} Java/Tomcat Servlet that provides the
+  HTTP interface for sample upload. The received samples are stored in
+  the file system for backup in order to have a backup and passed to
+  the DB ingester thread. When both operations where successful a
+  response code "202 Accepted" is sent back to the client.
+\item {\bf DB Ingester.} Stores sensor samples in a database. 
+  The samples are provided in ssf format and written to a PostgreSQL
+  database with the following scheme: Figure \ref{fig:db_scheme}.
+\item {\bf Inspection tool.} This component allows to inspect the
+  stored samples in the database in a convenient way and prepare and
+  export them for usage in the data mining task. Figure
+  \ref{fig:inspection} shows a screenshot of two views of the front
+  end. We are currently expanding this tool to also include
+  visualizations of the data mining results.
+\end{itemize}
+
+For integration with the Live+Gov service center, we provide an
+external service, that probes the upload URL in regular intervals and
+sends health checks and uploads log files to the central server as
+described in deliverable D4.2.
+
+\begin{figure}
 \centering
 \includegraphics[width=0.7\textwidth]{img/sc/ss_architecture.jpg}
 \caption{Sensor Collection Architecture}\label{fig:ss_architecture}
 \end{figure}
 
-Architecture Description
-
-\subsection{Database Scheme}
-
-The uploaded samples are stored in a
-PostgreSQL\footnote{http://www.postgresql.org/} database. We have
-switched from MySQL to this technology, because of the advanced query
-fuctionality that is offered by the
-PostGIS\footnote{http://postgis.net/} plugin.
-
-The database has the following schema:
+\begin{figure}
 {\small
 \begin{verbatim}
 sensor_gps (trip_id INT, ts BIGINT, lonlat GEOGRAPHY(Point));
-sensor_accelerometer (trip_id INT, ts BIGINT, x FLOAT, y FLOAT, z FLOAT);
-sensor_linear_acceleration (trip_id INT, ts BIGINT, x FLOAT, y FLOAT, z FLOAT);
-sensor_gravity (trip_id INT, ts BIGINT, x FLOAT, y FLOAT, z FLOAT);
+sensor_accelerometer (trip_id INT, ts BIGINT, 
+     x FLOAT, y FLOAT, z FLOAT);
+sensor_linear_acceleration (trip_id INT, ts BIGINT,
+     x FLOAT, y FLOAT, z FLOAT);
+sensor_gravity (trip_id INT, ts BIGINT, 
+     x FLOAT, y FLOAT, z FLOAT);
 sensor_tags (trip_id INT, ts BIGINT, tag TEXT);
 sensor_google_activity (trip_id INT, ts BIGINT, activity TEXT);
 har_annotation (trip_id INT, ts BIGINT, tag TEXT);
 \end{verbatim}}
+\label{fig:db_scheme}
+\caption{Schema of the Sensor Storage DB}
+\end{figure}
 
-\subsection{Inspection Front End}
-
-
-\subsection{Integration of Logging and Heartbeats}
-
-
-
-\subsection{Cross-Platform Strategy}
-Explain problems with Titanium framework.
-
-Android component runs on Blackberry. 
-
-Implement HAR as SAAS. Write client app for iOS.
-
+\begin{figure}[ht]
+  \begin{minipage}[b]{0.45\linewidth}
+    \includegraphics[width=0.9 \textwidth]{img/sc/inspection_table.png}
+    \caption{Meta table}\label{fig:minipage1}
+  \end{minipage}\quad
+  \begin{minipage}[b]{0.45\linewidth}
+    \includegraphics[width=0.9 \textwidth]{img/sc/inspection_raw_tab.png} 
+    \caption{Raw data inspection view}\label{fig:minipage2}
+  \end{minipage}
+  \caption{Inspection Web Tool}
+  \label{fig:inspection}
+\end{figure}
 
 %%% Local Variables:
 %%% mode: latex
