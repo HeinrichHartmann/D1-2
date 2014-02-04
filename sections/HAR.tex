@@ -66,7 +66,7 @@ Architecture Description.
 
 \begin{itemize}
   \item \texttt{SAMPLE PRODUCER} The samples chosen to be used to train the 
-    classifier are present in a csv file. Because of reuseablitiy the file hase 
+    classifier are present in a CSV file. Because of reusability the file has 
     to be imported line by line so it is possible to reuse the whole streaming
     pipeline, which is already in place for the mobile device.
   \item \texttt{WINDOW PRODUCER} Since the classification of the current 
@@ -77,7 +77,7 @@ Architecture Description.
     place. After the check, all windows get standardized to a constant frequency
     using interpolation between the data points.
   \item \texttt{FEATURE CALCULATION} The classification runs on different 
-    features extraced from the windows (cf. \ref{sec:har_features}).
+    features extracted from the windows (cf. \ref{sec:har_features}).
   \item \texttt{CSV-PERSISTOR} For further processing of the calculated data
     it is required to be store. This is done using a simple CSV data format,
     to ensure cross program importability.
@@ -98,7 +98,7 @@ Architecture Description.
     recognition.
   \item \texttt{HAR PIPELINE} The pipeline reuses most parts described in 
     \ref{fig:classification_architecture}. The difference here is the fully 
-    trained classifier, which trys to identify the current activity.
+    trained classifier, which tries to identify the current activity.
   \item \texttt{INTENT BROADCASTER} After the classifier recognised an activity,
     it gets broadcasted using an intent.
 \end{itemize}
