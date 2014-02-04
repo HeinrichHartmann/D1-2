@@ -51,8 +51,9 @@ be drawn on the map, but only lines that are currently affected by
 trams are shown on the map at each time. If no jams are detected in
 between two stops, this interval is shown with green colored line. If
 a jam is detected between stops, the interval is shown with red
-colored line. Image \ref{fig:tjd_screenshot} shows a screenshot of the application on how the
-jams are presented in Helsinki city center during the trial.
+colored line. Image \ref{fig:tjd_screenshot} shows a screenshot of the
+application on how the jams are presented in Helsinki city center
+during the trial.
 
 \begin{figure}
 \centering
@@ -73,6 +74,18 @@ Framework.
 \centering
 \includegraphics[width=0.5 \textwidth]{img/tjd/architecture.jpg}
 \caption{Traffic Jam Module Architecture}\label{fig:tjd_architecture}
+\end{figure}
+
+\begin{figure}
+\centering
+\begin{tabular}{|l|l|}
+\hline
+Address     & 213.157.92.101:80 \\ \hline
+Path        & /jamdetector/JamService.svc/jams/{authority} \\ \hline
+Protocol    & HTTP GET \\ \hline
+Data format & JSON \\ \hline
+\end{tabular}
+\caption{Jam Detection Module Details}
 \end{figure}
 
 \subsubsection*{Live+Gov SaaS solution compatibility}
