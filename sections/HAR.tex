@@ -146,7 +146,6 @@ Index & Name     & Description \\ \hline
 \label{fig:har_features}
 \end{figure}
 
-
 In the next step several machine-learning methods to train classifiers
 on the stored feature vectors. The individual methods are explained in
 sections \ref{sec:DectionTree} and \ref{sec:SVM}.  The trained
@@ -379,11 +378,11 @@ We get the following evaluation results:
 \begin{center}
 \begin{tabular}{|lll|r|} \hline
   {\bf Classifier} & {\bf Features} & {\bf Dataset} & {\bf Accuracy in \%} \\ \hline
-  DT	& MAN	& UKOB	&ca.	$65$ \\ 
+  DT	& MAN	& UKOB	&	$62$ \\ 
   DT	& PCA	& UKOB	&	$45$\\ 
   SVM	& MAN	& UKOB	&	$87$\\ 
   SVM	& PCA	& UKOB	&	$54$\\
-  DT	& MAN	& UCI	&ca.	$70$ \\ 
+  DT	& MAN	& UCI	&	$78$ \\ 
   DT	& PCA	& UCI	&	$92$ \\ 
   SVM	& MAN	& UCI	&	$85$ \\ 
   SVM	& PCA	& UCI	&	$64$ \\ \hline
@@ -399,12 +398,17 @@ Figure \ref{fig:har_eval} shows a plot of these accuracy values.
   \label{fig:har_eval}
 \end{figure}
 
-\todo{HH}{Discussion of Evaluation Results.}
+
+\pagebreak
+\todo{HH}{Expand Discussion of Evaluation Results.}
 
 Upshot:
-* Decision tree on manual features has acceptable performance
-* Best classification with SVM on manual features
-* Annomalies in Confusion Matrices: Sitting is not detected in UKOB dataset.
+\begin{itemize}
+\item  Decision tree on manual features has acceptable performance
+\item  Best classification with SVM on manual features
+\item  Still below state of the art classifier by \cite{Anguita} with 97\% accuracy.
+\item  Annomalies in Confusion Matrices: Sitting is not detected in UKOB dataset.
+\end{itemize}
 
 %%% Local Variables:
 %%% mode: latex

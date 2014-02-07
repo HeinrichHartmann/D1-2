@@ -149,13 +149,27 @@
 \begin{LGExecutiveSummary}
   \vspace{10pt} 
 
-\todo{HH}{Add Summary}
+\todo{HH}{Expand Summary}
 
-Summarize Components and their features and evaulation:
+Upshot:
+\begin{itemize}
+\item Present Improved Sensor Collector. Better performance for
+  recording on low end devices. New sensor Exchange format.
+  Cross Platform Implementation in Titanium available. But technical
+  problems prohibit further use of this technology.
+\item Human Activity Recognition Classifier. Fully integrated and used
+  in trial. Two data-sets collected. Evaluation of 4 different
+  methods. Found good results with manual features and decision
+  trees. Maximum classification accuracy of 84 \% still below 
+  literature accuracy of 97\% with multimodal SVM.
+\item Service Line Detection. Fully integrated and used in trial. Two
+  stage algorithm that makes use of HSL live data.
+\item Traffic Jam Detection. Fully integrated and used in trial.
+\item Research on Distribued Geo Matching linking social media to
+  public transportation.
+\item Publication on Geographic topic analysis.
+\end{itemize}
 
-Sensor Collector with improved Performance and Battery Awareness
-HAR component fully integrated with up to 85 accuracy.
-SLD component with 
 
 
 \end{LGExecutiveSummary}
@@ -228,59 +242,71 @@ SLD component with
 \chapter{Introduction}
 \label{chap:Introduction}
 
+\todo{HH}{Expand Introduction}
+
+The following description of the deliverable was given in the DoW:
+
+\begin{center}
+  \begin{minipage}{0.8 \textwidth}
+    {\bf Sensor Data App with Mining Functionality.} \\
+    This deliverable will provide the extended version of the data
+    capturing prototype for mobile devices, with implemented reality
+    mining methods and optimized communication interfaces for result
+    transmissions to the application server.
+\end{minipage}
+\end{center}
+
+Upshot:
+\begin{itemize}
+\item Context of Deliverable in L+G project:
+  a) Continuation of work on sensor collection.
+  b) Development of reality mining methods for use in field trials.
+\item Integrate components into L+G toolkit to ensure reusability and
+  facilitate collaboration between partners. Present Components 
+  {\bf Server Side Mining Service} and {\bf Mobile Sensor Mining Component}.
+\end{itemize}
+
 \begin{figure}
   \centering
   \includegraphics[width = 0.8 \textwidth]{img/intro/architecture.png}
   \caption{Live+Gov Toolkit Architecture}
 \end{figure}
 
-% * Presented Sensor Collection Service in last deliverable
-%   Improved architecture in several ways
-% 
-% * Provide Methods for 
-%   - Mobile Sensor Mining Component
-%   - Serverside Mining Component
 
-{\bf Description of Deliverable D1.2 (DoW)}: \\
-Sensor Data App with Mining Functionality: This deliverable will provide the
-extended version of the data capturing prototype for mobile devices, with
-implemented reality mining methods and optimized communication interfaces for
-result transmissions to the application server.
-
-Task Descriptions from the DOW:
-\begin{itemize}
-\item[T1.1] {\bf Sensor and user input data capturing} \\
-  This task will first define a taxonomy of classifications that are useful to
-  determine for contextualization of citizens’ uploads including activity
-  profiles (e.g. walking, cycling, riding train, riding bus,...) and coarse
-  issue classifications (street, people, traffic,...). Research investigations
-  will determine how these categories can be captured and classified
-  economically using limited battery power (e.g. trading off between power
-  draining sensors like GPS or audio by less expensive ones like accelerator
-  monitoring) and limited bandwidth to the Live+Gov backbone server. The task
-  also comprises the contextualized capturing of citizen text, deictic or voice
-  input while accounting for limitations of mobile hardware and communication
-  channels.
-\item[T1.2] {\bf Smartphone based reality mining} \\
-  In this task we will develop memory and energy aware mining mechanisms for
-  exploiting data collected in T1.1 for various kinds of initial processing on
-  mobile devices - including classification, filtering, abstraction, and
-  personalization. The key concern of our development will be on wide usability
-  of reality mining methods and their flexible applicability for dynamic user
-  contextualization in project scenarios.
-\item[T1.3] {\bf Server based reality mining} \\
-  Based on limited analysis of data in T1.2 and based on citizens’ preferences
-  and explicit consent, (possibly) abstracted sensor data will be uploaded to
-  the Live+Gov backbone where further mining will occur. We will develop mining
-  methods which are needed for the application, but cannot be run on individual
-  smartphones (e.g.  because input from multiple users is needed). In
-  particular, this will comprise the detection of common patterns delivered from
-  many citizens, but also outlier detection and treatment, which is required to
-  discover spoofing or important emergencies. The methods resulting from this
-  task will be particularly relevant for supporting augmented reality
-  applications (WP3) and contextualization of data mining results in eGovernance
-  scenarios in line with policy models (WP2).
-\end{itemize}
+% Task Descriptions from the DOW:
+% \begin{itemize}
+% \item[T1.1] {\bf Sensor and user input data capturing} \\
+%   This task will first define a taxonomy of classifications that are useful to
+%   determine for contextualization of citizens’ uploads including activity
+%   profiles (e.g. walking, cycling, riding train, riding bus,...) and coarse
+%   issue classifications (street, people, traffic,...). Research investigations
+%   will determine how these categories can be captured and classified
+%   economically using limited battery power (e.g. trading off between power
+%   draining sensors like GPS or audio by less expensive ones like accelerator
+%   monitoring) and limited bandwidth to the Live+Gov backbone server. The task
+%   also comprises the contextualized capturing of citizen text, deictic or voice
+%   input while accounting for limitations of mobile hardware and communication
+%   channels.
+% \item[T1.2] {\bf Smartphone based reality mining} \\
+%   In this task we will develop memory and energy aware mining mechanisms for
+%   exploiting data collected in T1.1 for various kinds of initial processing on
+%   mobile devices - including classification, filtering, abstraction, and
+%   personalization. The key concern of our development will be on wide usability
+%   of reality mining methods and their flexible applicability for dynamic user
+%   contextualization in project scenarios.
+% \item[T1.3] {\bf Server based reality mining} \\
+%   Based on limited analysis of data in T1.2 and based on citizens’ preferences
+%   and explicit consent, (possibly) abstracted sensor data will be uploaded to
+%   the Live+Gov backbone where further mining will occur. We will develop mining
+%   methods which are needed for the application, but cannot be run on individual
+%   smartphones (e.g.  because input from multiple users is needed). In
+%   particular, this will comprise the detection of common patterns delivered from
+%   many citizens, but also outlier detection and treatment, which is required to
+%   discover spoofing or important emergencies. The methods resulting from this
+%   task will be particularly relevant for supporting augmented reality
+%   applications (WP3) and contextualization of data mining results in eGovernance
+%   scenarios in line with policy models (WP2).
+% \end{itemize}
 
 
 
