@@ -26,10 +26,10 @@ running in the background with Titanium. This feature is clearly
 required for an integrated activity recognition library which shall be
 used in the field trials.
 
-As stated in D1.1 foresees, we propose independent native
-implementation as fallback solution in this case. So far we have a
-running implementation for Android and Blackberry. An iPhone port is
-planned, once the implementation is more stable.
+As stated in D1.1, we propose independent native implementation as
+fallback solution in this case. So far we have a running
+implementation for Android and Blackberry. An iPhone port is planned,
+once the implementation is more stable.
 
 
 \subsection{HAR Method Summary}\label{sec:har_method}
@@ -42,15 +42,15 @@ the ``training phase'' and the ``integration phase''.
 \centering
 \subfigure[HAR Training Phase]{
 \label{fig:har_overview}
-\includegraphics[width=0.5 \textwidth]{img/har/classification_overview.png}
-}
+\includegraphics[width=0.45 \textwidth]{img/har/classification_overview.png}
+} \hspace{1cm}
 \subfigure[HAR Integration Phase]{
 \label{fig:integrated_har_overview}
 \includegraphics[width=0.25 \textwidth]{img/har/integration_overview.png}
 }
-\caption{Overview Human Activity Recognition}
+\caption{Human Activity Recognition Method Overview}
+\label{fig:HAR_PHASES}
 \end{figure}
-
 
 In the training phase (cf. Figure \ref{fig:har_overview}) a group of
 volunteers is asked to perform the targeted activities for a certain
@@ -75,32 +75,84 @@ discussions of quality of the recognition results.
 
 \subsection{Component Description}\label{sec:har_component}
 
-Architecture Description.
+The Human Activity Recognition Component implements the two phases
+described in Figure \ref{fig:HAR_PHASES}. The training phase is
+executed offline on a server and uses the following processing
+pipeline (cf. Figure \ref{fig:classification_architecture}).
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{img/har/classification_architecture.jpg}
-\caption{Classification Architecture}\label{fig:classification_architecture}
+\caption{HAR Training Pipeline}\label{fig:classification_architecture}
 \end{figure}
 
-\begin{itemize}
-  \item \texttt{SAMPLE PRODUCER} The samples chosen to be used to train the 
-    classifier are present in a CSV file. Because of reusability the file has 
-    to be imported line by line so it is possible to reuse the whole streaming
-    pipeline, which is already in place for the mobile device.
-  \item \texttt{WINDOW PRODUCER} Since the classification of the current 
-    activity uses a timeframe, the window producer groups them together. It
-    allows different window sizes and overlaps.
-  \item \texttt{INTERPOLATION \& QUALITY CHECK} To remove frequency disparity 
-    and ignore timeframes below a set sample frequency a quality check is in 
-    place. After the check, all windows get standardized to a constant frequency
-    using interpolation between the data points.
-  \item \texttt{FEATURE CALCULATION} The classification runs on different 
-    features extracted from the windows (cf. \ref{sec:har_features}).
-  \item \texttt{CSV-PERSISTOR} For further processing of the calculated data
-    it is required to be store. This is done using a simple CSV data format,
-    to ensure cross program importability.
-\end{itemize}
+\begin{enumerate}
+  \item {\bf Annotated Sensor Data.} The training data is stored as
+    ssf files in the file system. The annotations are represented as
+    folder structure. In this way it becomes very easy to add new
+    training data to the repository. Using the inspection web tool,
+    one can select appropriate time slices and export the
+    corresponding samples as ``.ssf'' file. The exported file is then
+    moved to the folder corresponding to the recorded activity.
+  \item {\bf Sample Producer.} The sample producer service reads the 
+    sensor samples from the file system and pushes them onto a generic 
+    sample processing pipeline. The interface is designed a way that
+    resembles the incoming data stream on the mobile device.
+  \item {\bf Window Producer.} The window producer takes as
+    constructor parameters a window-length and a delay. Incoming
+    sensor samples are grouped in windows of the given length and
+    passed further down as a single object.
+  \item {\bf Interpolation and Quality Check.}  To remove frequency
+    disparity and ignore timeframes below a set sample frequency a
+    quality check is in place. After the check, all windows get
+    interpolated to a constant frequency of $50Hz$.
+  \item {\bf Feature Calculation.} The classification calculates
+    different features extracted from windows of raw sampling data. A
+    complete list of implemented features is provided in Figure
+    \ref{fig:har_features}.
+  \item {\bf CSV-Persistor.} The calculated feature vectors are stored
+    on the file system as CSV file. 
+\end{enumerate}
+
+
+\begin{figure}
+\centering
+\begin{tabular}{|r|l|p{10cm}|} \hline
+Index & Name     & Description \\ \hline
+0            & id       & User ID of the recorded samples \\ \hline
+1            & tag      & Name of the recoded activity    \\ \hline
+2            & xMean    & Mean values of the individual axes \\ 
+3            & yMean    &             \\ 
+4            & zMean    &             \\ \hline
+5            & xVar     & Variance of the individual axes  \\ 
+6            & yVar     &             \\ 
+7            & zVar     &             \\ \hline
+8            & s2Mean   & Mean value of the length of the acceleration
+                          vector. \\ \hline
+9            & s2Var    & Variance of the length of the acceleration
+                          vector \\ \hline
+10           & tilt     & Average tilting angle of the device towards
+                          the vertical axes. \\ \hline
+11           & energy   & Total energy of the recording.  \\ \hline
+12           & kurtosis & Kurtosis measure of "peakedness" of the
+                          length of the acceleration vector. \\ \hline
+13-24        & S2Bins   & Histogram over the length of the
+                          acceleration vector. \\ \hline
+25-37        & FFTBins  & Historgram over the absolute values of the
+                          Fourier Modes of the length of the
+                          acceleration vector. \\ \hline
+\end{tabular}
+\caption{Features Vectors used for HAR classification.}
+\label{fig:har_features}
+\end{figure}
+
+
+In the next step several machine-learning methods to train classifiers
+on the stored feature vectors. The individual methods are explained in
+sections \ref{sec:DectionTree} and \ref{sec:SVM}.  The trained
+classifier is then exported as a java module. The following processing
+pipeline is used to integrate the classifier on the mobile device
+(cf. Figure \ref{fig:integrated_har}).
 
 \begin{figure}[htbp]
 \centering
@@ -108,64 +160,43 @@ Architecture Description.
 \caption{Integrated HAR Architecture}\label{fig:integrated_har}
 \end{figure}
 
-\begin{itemize}
-  \item \texttt{SENSOR EVENT THREAD} The sensor collector is connected to nearly
-    all sensors available on the device. The samples get pushed into a queue to 
-    keep the calculation time needed for each sensor event at a minimum.
-  \item \texttt{DISPATCHER THREAD} This thread distributes the sensor samples to
-    each connected component like the persistor or the human activity 
-    recognition.
-  \item \texttt{HAR PIPELINE} The pipeline reuses most parts described in 
-    \ref{fig:classification_architecture}. The difference here is the fully 
-    trained classifier, which tries to identify the current activity.
-  \item \texttt{INTENT BROADCASTER} After the classifier recognised an activity,
-    it gets broadcasted using an intent.
-\end{itemize}
+\begin{enumerate}
+\item {\bf Dispatcher Thread.} The dispatcher thread is part of
+  the sensor collection architecture described in Chapter
+  \ref{chap:sc}. It emits all gathered samples in the ssf format.
+\item {\bf HAR Pipeline.} The HAR pipeline reuses most parts described
+  in Figure \ref{fig:classification_architecture}. The Sample Producer
+  is replaced by the Dispatcher Thread as source for sensor data.
+\item {\bf HAR Classifier.} The HAR classifier component warps
+  exported java method and outputs the results of the classification
+  as string objects. The current implementation uses a decision tree.
+\item {\bf Intent Broadcaster.} The classification results are
+  broadcasted as an intent for use in other parts of the system
+  (e.g. GUI, storage).
+\end{enumerate}
 
 
-\subsection{Features}\label{sec:har_features}
-
-\begin{itemize}
-  \item Mean of each individual axis
-  \item Variance of each individual axis
-  \item Mean of standard deviation
-  \item Variance of standard deviation
-  \item Bin distribution of standard deviation
-  \item Bin distribution of frequency domain
-  \item Device tilting angle
-  \item Energy
-  \item Kurtosis
-\end{itemize}
-
-
+\clearpage
 \subsection{Classifier Training}\label{sec:har_classifier_training}
 
-The first step is separating the data set into a train and test set. Here we 
-used data from different users for each activity. After both data sets got 
-processed by the classification architecture (cf. Figure \ref{fig:classification_architecture})
-the training and test set get imported into {\it Weka}\footnote{\url{http://www.cs.waikato.ac.nz/ml/weka/}}.
-Weka comes with build in machine learning algorithms to choose from. Here the 
-J48 implementation of the C4.5 algorithm is used to create a decision tree out 
-of the provided training set. The test set is used to validate the created tree
-and calculate the accuracy and confusion matrix. Since Weka allows to export 
-the created tree as Java class, it is possible to integrate the output directly 
-into the HAR Pipeline.
 
-% TODO CE
-% Describe the component implementation.
-% This can be done in a similar fashion like the sensor collector
-% further up: Add Bullet point list for the individual components.
-% And describe them in one or two sentences.
-% * Add a list for the features we use in the current implementation
-% * Describe how we train the decision tree classifier using WEKA.
-%   Add a screenshot of the results. 
-% * Describe how we integrate the classifier into the application
 
-% TODO:
-% * Describe Dection Tree Classifier [HH]
-% * Describe SVM [CERTH]
+\subsubsection*{Decision Tree based classifier}
+\label{sec:DectionTree}
+
+% The training and test set get were imported into {\it
+%   Weka}\footnote{\url{http://www.cs.waikato.ac.nz/ml/weka/}}.  Weka
+% comes with build in machine learning algorithms to choose from. Here
+% the J48 implementation of the C4.5 algorithm is used to create a
+% decision tree out of the provided training set. The test set is used
+% to validate the created tree and calculate the accuracy and confusion
+% matrix. Since Weka allows to export the created tree as Java class, it
+% is possible to integrate the output directly into the HAR Pipeline.
+
+\todo{HH}{Write section explaining Decision Tree Classifier.}
 
 \subsubsection*{SVM based classifier}
+\label{sec:SVM}
 
 A popular algorithm to train a binary classification model for mapping
 features to activities is the Support Vector Machines (SVMs). SVMs are
@@ -279,6 +310,8 @@ the examined one.
 % computationally very efficient, making it possible for the image
 % classification algorithm to run entirely on a mobile phone.
 
+
+
 \subsection{Evaluation}\label{sec:har_eval}
 
 We have evaluated our classifier on two different datasets.
@@ -287,17 +320,20 @@ The first dataset was gathered on the University Campus in Koblenz in
 December 2013.  It contains a total of around $900K$ samples collected
 by $10$ volunteers.  The volunteers were instructed to perform the
 activities ''walking'', ''running'', ''stairs'' and ''cycling'' on
-predefined routes on the university campus (cf. Figure
-\ref{fig:data_collection_handout}). The total time effort per
-volunteer was about 20-25minutes and a financial reward was offered as
+predefined routes on the university campus. 
+% (cf. Figure \ref{fig:data_collection_handout}). 
+The total time effort per volunteer was about 20-25minutes and a financial reward was offered as
 an incentive. After the recording the samples have been inspected
 using our inspection tool and the beginning and ending of the
 activities were manually stripped in order to avoid noise from holding
 the device in the hand.
 
-%
-% [TODO: Publication of Dataset!]
-%
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=\textwidth]{img/har/data_collection_handout.png}
+%   \caption{Instructions for data collection in German
+%     language}\label{fig:data_collection_handout}
+% \end{figure}
 
 The other dataset was obtained from the {\it UCI Machine Learning
   Repository}\footnote{\url{http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones}}
@@ -309,7 +345,7 @@ Figure \ref{fig:har_datasets}. Both datasets contain only
 accelerometer samples, and have been preprocessed that have been
 sampled at a fixed rate of $50Hz$.
 
-\begin{figure}
+\begin{figure}[h]
 \centering
 \begin{tabular}{|l|r|r|} \hline
 Activity  & UCI Dataset & UKOB Dataset \\ \hline
@@ -322,23 +358,53 @@ stairs    & 188.800     & 30.086        \\
 lying     & 124.416     & 0            \\ \hline \hline
 Totals    & 659.136     & 903.156       \\ \hline
 \end{tabular}
-
 \caption{Number of accelerometer samples by activity and dataset.}
 \label{fig:har_datasets}
 \end{figure}
 
-\begin{figure}[htbp]
+Both datasets have been split into a training data-set and a test
+data-set. The individual parts contain only full recordings of the
+activities. No single recording is present in both parts of the
+split. The volume is distributed in roughly $66/33$ ratio between
+both parts.
+
+We have three different parameters for the evaluation:
+\begin{itemize}
+\item {\bf Classifier.} Decision Tree (DT) or support vector machine (SVM)
+\item {\bf Features.} Manually selected (MAN) or PCA based (PCA)
+\item {\bf Dataset.} Self collected (UKOB) ore reference dataset (UCI)
+\end{itemize}
+
+We get the following evaluation results:
+\begin{center}
+\begin{tabular}{|lll|r|} \hline
+  {\bf Classifier} & {\bf Features} & {\bf Dataset} & {\bf Accuracy in \%} \\ \hline
+  DT	& MAN	& UKOB	&ca.	$65$ \\ 
+  DT	& PCA	& UKOB	&	$45$\\ 
+  SVM	& MAN	& UKOB	&	$87$\\ 
+  SVM	& PCA	& UKOB	&	$54$\\
+  DT	& MAN	& UCI	&ca.	$70$ \\ 
+  DT	& PCA	& UCI	&	$92$ \\ 
+  SVM	& MAN	& UCI	&	$85$ \\ 
+  SVM	& PCA	& UCI	&	$64$ \\ \hline
+\end{tabular}
+\end{center}
+
+Figure \ref{fig:har_eval} shows a plot of these accuracy values.
+
+\begin{figure}[ht]
   \centering
-  \includegraphics[width=\textwidth]{img/har/data_collection_handout.png}
-  \caption{Instructions for data collection in German
-    language}\label{fig:data_collection_handout}
+  \includegraphics[width= 0.5 \textwidth]{img/har/accuracy_plot.png}
+  \caption{Classification accuracy of HAR classifiers}
+  \label{fig:har_eval}
 \end{figure}
 
+\todo{HH}{Discussion of Evaluation Results.}
 
-%
-% TODO: Describe Evaluation Results
-%
-
+Upshot:
+* Decision tree on manual features has acceptable performance
+* Best classification with SVM on manual features
+* Annomalies in Confusion Matrices: Sitting is not detected in UKOB dataset.
 
 %%% Local Variables:
 %%% mode: latex

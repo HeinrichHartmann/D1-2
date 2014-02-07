@@ -330,11 +330,9 @@ via simple UNIX command line tools.
 The sensor storage service runs on the Live+Gov servers and stores the
 sensor samples collected by the mobile sensor collection component.
 The storage component offers a HTTP/REST interface to upload sensor
-data upload available at
-\url{http://141.26.71.84:8080/UploadServlet/}.  The uploaded samples
-are stored in a PostgreSQL\footnote{http://www.postgresql.org/}
-database with PostGIS\footnote{http://postgis.net/} plugin for Geo
-queries.
+data.  The uploaded samples are stored in a
+PostgreSQL\footnote{http://www.postgresql.org/} database with
+PostGIS\footnote{http://postgis.net/} plugin for Geo queries.
 
 The architecture is sketched in \ref{fig:ss_architecture}. It consists
 of the following components.
@@ -346,7 +344,7 @@ of the following components.
   response code "202 Accepted" is sent back to the client.
 \item {\bf DB Ingester.} Stores sensor samples in a database. 
   The samples are provided in ssf format and written to a PostgreSQL
-  database with the following scheme: Figure \ref{fig:db_scheme}.
+  database with schema described in Figure \ref{fig:db_scheme}.
 \item {\bf Inspection tool.} This component allows to inspect the
   stored samples in the database in a convenient way and prepare and
   export them for usage in the data mining task. Figure
