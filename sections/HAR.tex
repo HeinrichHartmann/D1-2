@@ -3,6 +3,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:HAR}
 
+\newcommand{\IR}{\mathbb{R}}
+
 In this section we describe the implementation of the human acitivity
 recognition ('HAR') component on the mobile device.  The algorithmic
 foundation of this data mining task have been described in detail in
@@ -108,16 +110,67 @@ pipeline (cf. Figure \ref{fig:classification_architecture}).
     interpolated to a constant frequency of $50Hz$.
   \item {\bf Feature Calculation.} The classification calculates
     different features extracted from windows of raw sampling data. A
-    complete list of implemented features is provided in Figure
-    \ref{fig:har_features}.
+    description of the used features is included in section
+    \ref{sec:feature_calc}.
   \item {\bf CSV-Persistor.} The calculated feature vectors are stored
     on the file system as CSV file. 
 \end{enumerate}
 
+In the next step the stored annotated feature vectors are used for
+training of machine learning classifiers. For this task we relyed on 
+available external tools like
+WEKA\footnote{\url{http://www.cs.waikato.ac.nz/ml/weka/}}
+and libsvm\footnote{\url{http://www.csie.ntu.edu.tw/~cjlin/libsvm/}}.
+More details of the classification methods are given in section
+\ref{sec:har_classifier_training}.
+The trained classifiers were then exported as java methods and
+integrated into the mobile HAR service (cf. Figure \ref{fig:integrated_har}).
 
-\begin{figure}
+\begin{figure}[htbp]
 \centering
-\begin{tabular}{|r|l|p{10cm}|} \hline
+\includegraphics[width=\textwidth]{img/har/integration.jpg}
+\caption{Integrated HAR Architecture}\label{fig:integrated_har}
+\end{figure}
+
+The integrated mobile HAR architecture consists of the following components.
+\begin{enumerate}
+\item {\bf Dispatcher Thread.} The dispatcher thread is part of
+  the sensor collection architecture described in Chapter
+  \ref{chap:sc}. It emits all gathered samples in the ssf format.
+\item {\bf HAR Pipeline.} The HAR pipeline reuses most parts described
+  in Figure \ref{fig:classification_architecture}. The Sample Producer
+  is replaced by the Dispatcher Thread as source for sensor data.
+\item {\bf HAR Classifier.} The HAR classifier component warps
+  exported java method and outputs the results of the classification
+  as string objects. The current implementation uses a decision tree.
+\item {\bf Intent Broadcaster.} The classification results are
+  broadcasted as an intent for use in other parts of the system
+  (e.g. GUI, storage).
+\end{enumerate}
+
+\subsection{Feature Calculation}
+\label{sec:feature_calc}
+
+For the classifiaction of activities, we cannot directly use the raw
+stream of sensor data. The reason is that machine learning classifiers
+cannot operate on data streams directly, but need to get explicit
+vectors as input. Moreover, these vectors cannot have arbitrary
+dimension. If we feed in the raw sensor signal of only 5 seconds
+recording, we get a vector of dimension
+\[ d = 50 Hz \cdot 5 sec \cdot 3\ axes = 1000, \]
+which is too much to handle for most classification algorithms.
+
+With the calculation of features, we try to reduce the dimensionality
+of the input signal, while keeping the essential information contained
+in the signal. We use two different methods for feature calculation
+{\it manual selection} and an automated {\it PCA} based feature set.
+
+\subsubsection*{\bf Manually Selected Features}
+
+The following manual features have been selected:
+
+\begin{center}
+\begin{tabular}{|r|l|p{11.5cm}|} \hline
 Index & Name     & Description \\ \hline
 0            & id       & User ID of the recorded samples \\ \hline
 1            & tag      & Name of the recoded activity    \\ \hline
@@ -134,67 +187,177 @@ Index & Name     & Description \\ \hline
 10           & tilt     & Average tilting angle of the device towards
                           the vertical axes. \\ \hline
 11           & energy   & Total energy of the recording.  \\ \hline
-12           & kurtosis & Kurtosis measure of "peakedness" of the
-                          length of the acceleration vector. \\ \hline
+12           & kurtosis & Kurtosis\footnote{\url{http://en.wikipedia.org/wiki/Kurtosis}} 
+                          measure of "peakedness" of the length of 
+                          the acceleration vector. \\ \hline
 13-24        & S2Bins   & Histogram over the length of the
                           acceleration vector. \\ \hline
 25-37        & FFTBins  & Historgram over the absolute values of the
                           Fourier Modes of the length of the
                           acceleration vector. \\ \hline
 \end{tabular}
-\caption{Features Vectors used for HAR classification.}
-\label{fig:har_features}
-\end{figure}
+\end{center}
 
-In the next step several machine-learning methods to train classifiers
-on the stored feature vectors. The individual methods are explained in
-sections \ref{sec:DectionTree} and \ref{sec:SVM}.  The trained
-classifier is then exported as a java module. The following processing
-pipeline is used to integrate the classifier on the mobile device
-(cf. Figure \ref{fig:integrated_har}).
+Our feature list has been guided by the literature (cf. D1.2,
+\cite{lara12}).  These consist of statistical features (mean and
+variance), that are computed for each of the three axes as well as for
+the length of the acceleration vector $s_2 = \sqrt{x^2 + y^2 + z^2}$.
+An explicit tilt-feature has been included to allow better separation
+of the ``sitting'' and ``standing'' classes.
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\textwidth]{img/har/integration.jpg}
-\caption{Integrated HAR Architecture}\label{fig:integrated_har}
-\end{figure}
+We also include frequency domain features.  The ``energy'' feature
+measures the total spectral
+density\footnote{\url{http://en.wikipedia.org/wiki/Spectral_density}}
+of the signal. Furthermore a set of histogram features measures the
+energy of different Fourier modes of the signal. We have divided
+energy spectrum into 10 equally distributed bins, covering roughly
+95\% of the observed energy spectrum in the training data. Two more
+bins added for outliers above and below the bin coverage.
 
-\begin{enumerate}
-\item {\bf Dispatcher Thread.} The dispatcher thread is part of
-  the sensor collection architecture described in Chapter
-  \ref{chap:sc}. It emits all gathered samples in the ssf format.
-\item {\bf HAR Pipeline.} The HAR pipeline reuses most parts described
-  in Figure \ref{fig:classification_architecture}. The Sample Producer
-  is replaced by the Dispatcher Thread as source for sensor data.
-\item {\bf HAR Classifier.} The HAR classifier component warps
-  exported java method and outputs the results of the classification
-  as string objects. The current implementation uses a decision tree.
-\item {\bf Intent Broadcaster.} The classification results are
-  broadcasted as an intent for use in other parts of the system
-  (e.g. GUI, storage).
-\end{enumerate}
+\subsubsection*{\bf PCA Based Features}
 
+There is a lot of freedom in the manual choice of feature vectors.
+Moreover, it is not clear that the heuristically selected features
+are able to separate the categories well. An automated way of
+selecting features is provided by the {\it Principal Component
+  Analysis} (PCA) method.\footnote{\url{http://en.wikipedia.org/wiki/Principal_component_analysis}}
+This method selects a number of linear features that maximize 
+variance of the resulting data. We use a reduced vector size of $266$
+dimensions to keep $90\%$ of the variance in our data set.
 
-\clearpage
 \subsection{Classifier Training}\label{sec:har_classifier_training}
 
+In this section we present more details about the employed machine
+learning methods for human activity recognition. Both methods rely on
+a training set of annotated feature vectors, and cannot be used
+directly on the data-streams. As was explained in D2.1 the two
+presented methods are the most popular approaches in the literature
+and have led to good classification accuracies in earlier work.
 
-
-\subsubsection*{Decision Tree based classifier}
+\subsubsection*{{\bf Decision Tree HAR classifier}}
 \label{sec:DectionTree}
 
-% The training and test set get were imported into {\it
-%   Weka}\footnote{\url{http://www.cs.waikato.ac.nz/ml/weka/}}.  Weka
-% comes with build in machine learning algorithms to choose from. Here
-% the J48 implementation of the C4.5 algorithm is used to create a
-% decision tree out of the provided training set. The test set is used
-% to validate the created tree and calculate the accuracy and confusion
-% matrix. Since Weka allows to export the created tree as Java class, it
-% is possible to integrate the output directly into the HAR Pipeline.
+A decision tree uses a hierarchy of simple binary decisions to
+classify a feature vector into a set of given categories.  To be more
+precise, let $x_\bullet = (x_1, \dots, x_n)$ a feature vector with numeric
+feature values $x_i \in \IR$, and $C=\{c_1, \dots, c_N\}$ a set of
+target categories. The individual decision rules $R_k$ are of the form
+$(x_j \geq \alpha)$ or $(x_j \leq \alpha)$ for some index $j$ and
+threshold value $\alpha \in \IR$.  A decision tree, organizes several
+of those rules $R_k$ into a binary tree structure. The leaf nodes are
+linked to the corresponding target categories. Figure
+\ref{fig:decision_tree} shows an example of a tree with 9 decision
+nodes and 4 categories.
 
-\todo{HH}{Write section explaining Decision Tree Classifier.}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5 \textwidth]{img/har/decision_tree.png}
+\label{fig:decision_tree}
+\caption{An example of a decision tree.}
+\end{figure}
 
-\subsubsection*{SVM based classifier}
+In the case of the activity recognition classifier, we have the
+different activities (e.g. standing, walking, running) as 
+categories and a set of manually computed features like (standard
+deviations, or bin distributions of Fourier-modes) or automatically
+generated PCA-based features to base our decision rules on.
+
+Of course, we do not want to build a decision tree for the HAR task by
+hand, but automatically learn a suitable tree on the basis of
+annotated training data. For this task of decision tree learning,
+several methods are known. Notable ones
+include\footnote{\url{http://en.wikipedia.org/wiki/Decision_tree_learning}}:
+ID3 (Iterative Dichotomiser 3), C4.5 (successor of ID3), CART
+(Classification And Regression Tree), CHAID (CHi-squared Automatic
+Interaction Detector).
+
+We have chosen to use the C4.5 algorithm modified for continues
+attribute values \cite{quinlan1996improved} since it has been
+successfully used in the literature \cite{lara12} and an open source
+implementation is available and integrated into the WEKA toolkit.
+
+The C4.5 algorithm uses the concept of {\it information gain} to build
+up a decision tree in a recursive, greedy fashion.  For a set of
+annotated training vectors $T = \{ (x_\bullet, c) | c \in C \}$ a
+decision rule $R$ splits $T$ into two subsets:
+\[ T = T^+ \cup T^{-}, \quad T^+ = \{ R(x_\bullet, c) = \text{true}\}, \;
+T^- = \{ R(x_\bullet, c) = \text{false} \} \]
+The information gain of this rule is defined as 
+\[ IG(T,R) = H(T) - \frac{|T^+|}{|T|} \cdot H(T^+) - \frac{|T^-|}{|T|} \cdot H(T^-), \]
+where $H(S)$ is the entropy of the collection $S \subset T$
+cf. \cite{Shannon1948}. The C4.5 algorithm finds the decision rule
+with the largest information gain and uses this as the root for the
+decision tree. It the recurses into the subset $T^+$ and $T^-$ and
+adds the generated nodes as childs to the root node.
+
+The choice of the threshold values $\alpha$ for the decision rules is
+particularly crucial for the quality of the trained decision tee. A
+possible improvement of the threshold selection algorithm can be
+obtained by pre-clustering of the attribute values before the
+training process cf. \cite{kotsiantis2006}.
+
+Figure \ref{fig:dt_example} shows an example of a trained decision
+tree on manually generated features described in section \ref{sec:feature_calc}.
+
+\begin{figure}[h]
+\tiny
+\centering
+\begin{verbatim}
+J48 pruned tree
+------------------
+
+Number of Leaves  : 	52
+
+Size of the tree : 	103
+
+
+x18 <= 927
+|   x24 <= 152
+|   |   x20 <= 211
+|   |   |   x4 <= -2.936108
+|   |   |   |   x3 <= 1.132095
+|   |   |   |   |   x18 <= 458
+|   |   |   |   |   |   x35 <= 2: WALKING (6.0/1.0)
+|   |   |   |   |   |   x35 > 2: CYCLING (2.0)
+|   |   |   |   |   x18 > 458: SITTING (3.0)
+|   |   |   |   x3 > 1.132095: CYCLING (527.0)
+|   |   |   x4 > -2.936108
+|   |   |   |   x4 <= 7.830095
+|   |   |   |   |   x14 <= 13
+|   |   |   |   |   |   x18 <= 87
+|   |   |   |   |   |   |   x2 <= 3.434441
+|   |   |   |   |   |   |   |   x3 <= -2.172633
+|   |   |   |   |   |   |   |   |   x2 <= -3.51528: RUNNING (3.0/1.0)
+|   |   |   |   |   |   |   |   |   x2 > -3.51528: WALKING (45.0/1.0)
+|   |   |   |   |   |   |   |   x3 > -2.172633: CYCLING (5.0/1.0)
+|   |   |   |   |   |   |   x2 > 3.434441
+|   |   |   |   |   |   |   |   x19 <= 469: CYCLING (155.0)
+|   |   |   |   |   |   |   |   x19 > 469: WALKING (4.0/1.0)
+|   |   |   |   |   |   x18 > 87
+|   |   |   |   |   |   |   x18 <= 415
+|   |   |   |   |   |   |   |   x15 <= 17
+|   |   |   |   |   |   |   |   |   x34 <= 60
+|   |   |   |   |   |   |   |   |   |   x22 <= 138
+|   |   |   |   |   |   |   |   |   |   |   x20 <= 98
+|   |   |   |   |   |   |   |   |   |   |   |   x21 <= 58: CYCLING (10.0)
+|   |   |   |   |   |   |   |   |   |   |   |   x21 > 58: WALKING (56.0)
+|   |   |   |   |   |   |   |   |   |   |   x20 > 98
+|   |   |   |   |   |   |   |   |   |   |   |   x17 <= 108
+
+// TRUNCATED
+
+x18 > 927
+|   x10 <= 0.58851: SITTING (1071.0)
+|   x10 > 0.58851
+|   |   x3 <= -8.323328: WALKING (17.0)
+|   |   x3 > -8.323328: CYCLING (15.0/2.0)
+\end{verbatim}
+\normalsize
+\caption{Decision tree trained on manually computed features.}
+\label{fig:dt_example}
+\end{figure}
+
+\subsubsection*{{\bf Support Vector Machine HAR Classifier}}
 \label{sec:SVM}
 
 A popular algorithm to train a binary classification model for mapping
@@ -310,7 +473,6 @@ the examined one.
 % classification algorithm to run entirely on a mobile phone.
 
 
-
 \subsection{Evaluation}\label{sec:har_eval}
 
 We have evaluated our classifier on two different datasets.
@@ -409,6 +571,10 @@ Upshot:
 \item  Still below state of the art classifier by \cite{Anguita} with 97\% accuracy.
 \item  Annomalies in Confusion Matrices: Sitting is not detected in UKOB dataset.
 \end{itemize}
+
+
+
+
 
 %%% Local Variables:
 %%% mode: latex
