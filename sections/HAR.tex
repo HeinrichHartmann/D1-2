@@ -15,25 +15,6 @@ contains the descriptions of the implementation. In subsection
 \ref{sec:har_eval} we evaluate our method to the on two data sets and
 compare it to the state of the art approaches.
 
-Despite several attempts to port the component to other mobile
-platforms we have not been able to do so, due to technical
-difficulties which where hard to anticipate. As described in
-deliverable D1.1 it was planned to implement this component using the
-Appcelerator Titanium\footnote{\url{http://www.appcelerator.com/}}
-framework. Moreover, several viability checks were presented. In the
-first prototypes
-\footnote{\url{https://github.com/HeinrichHartmann/LiveGovWP1/tree/master/mobile/TitaniumSensorCollector}}
-it turned out, that it is not possible to collect sensor data while
-running in the background with Titanium. This feature is clearly
-required for an integrated activity recognition library which shall be
-used in the field trials.
-
-As stated in D1.1, we propose independent native implementation as
-fallback solution in this case. So far we have a running
-implementation for Android and Blackberry. An iPhone port is planned,
-once the implementation is more stable.
-
-
 \subsection{HAR Method Summary}\label{sec:har_method}
 
 The process of activity recognition uses a pipeline of signal
@@ -84,7 +65,7 @@ pipeline (cf. Figure \ref{fig:classification_architecture}).
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{img/har/classification_architecture.jpg}
+\includegraphics[width=\textwidth]{img/har/classification_architecture.png}
 \caption{HAR Training Pipeline}\label{fig:classification_architecture}
 \end{figure}
 
@@ -128,7 +109,7 @@ integrated into the mobile HAR service (cf. Figure \ref{fig:integrated_har}).
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{img/har/integration.jpg}
+\includegraphics[width=\textwidth]{img/har/integration.png}
 \caption{Integrated HAR Architecture}\label{fig:integrated_har}
 \end{figure}
 
@@ -287,7 +268,7 @@ The information gain of this rule is defined as
 where $H(S)$ is the entropy of the collection $S \subset T$
 cf. \cite{Shannon1948}. The C4.5 algorithm finds the decision rule
 with the largest information gain and uses this as the root for the
-decision tree. It the recurses into the subset $T^+$ and $T^-$ and
+decision tree. It then recurses into the subset $T^+$ and $T^-$ and
 adds the generated nodes as childs to the root node.
 
 The choice of the threshold values $\alpha$ for the decision rules is
@@ -297,7 +278,7 @@ obtained by pre-clustering of the attribute values before the
 training process cf. \cite{kotsiantis2006}.
 
 Figure \ref{fig:dt_example} shows an example of a trained decision
-tree on manually generated features described in section \ref{sec:feature_calc}.
+tree on manually generated features.
 
 \begin{figure}[h]
 \tiny
@@ -440,7 +421,7 @@ distance to the hyperplane of the model:
 \begin{figure}[h]
 \centering
   \includegraphics[width=0.6\textwidth]{img/svms/Svm_DimensionMap.pdf}
-  \caption{The data are not separable in the input space by a linear hyperplane. Using the kernel function, the data are mapped into a higher dimensional space where they can be linearly separated.}
+  \caption{Illustration of the kernel trick for sample separation.}
   \label{fig:svm_highDim}
 \end{figure}
 
@@ -552,7 +533,6 @@ We get the following evaluation results:
 \end{center}
 
 Figure \ref{fig:har_eval} shows a plot of these accuracy values.
-
 \begin{figure}[ht]
   \centering
   \includegraphics[width= 0.5 \textwidth]{img/har/accuracy_plot.png}
@@ -560,20 +540,34 @@ Figure \ref{fig:har_eval} shows a plot of these accuracy values.
   \label{fig:har_eval}
 \end{figure}
 
+These figures show, that we are still around 10\% away from the state
+of the art classifier used by \cite{Anguita} with 97\% accuracy. There
+the authors use a multi-modal SVM on a similar list manually selected
+feature vectors and slightly parameters for window length and overlap.
+Our integrated application relies on a decision tree and manual
+features, which show significantly weaker performance (64\%) than
+state of the art in our experiments.
 
-\pagebreak
-\todo{HH}{Expand Discussion of Evaluation Results.}
+It is hard to see clear trends from the evaluation results.  For the
+UCI dataset, a decision tree trained on PCA-features performs best.
+For the UKob dataset it is the SVM based on manual features. There
+are several possible reasons, for this phenomenon.  Firstly, the UKob
+dataset contains different activities than UCI, e.g. a large number
+samples is recorded for the cycling activity, which is not present at
+UCI, and conversely no samples for the lying task are present. It is
+possible, that certain classifier and feature combinations are more
+suitable for one set of activities, than for the other. Another
+anomaly in our data is the fact, that we were not able to recognize
+the activity ``sitting'' in our data. 
 
 Upshot:
 \begin{itemize}
 \item  Decision tree on manual features has acceptable performance
-\item  Best classification with SVM on manual features
-\item  Still below state of the art classifier by \cite{Anguita} with 97\% accuracy.
 \item  Annomalies in Confusion Matrices: Sitting is not detected in UKOB dataset.
 \end{itemize}
 
-
-
+\subsubsection*{\bf Confusion Matrices}
+\input{sections/confusion}
 
 
 %%% Local Variables:

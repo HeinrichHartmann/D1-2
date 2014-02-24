@@ -61,7 +61,7 @@ during the trial.
 \caption{Visualization of the current traffic situation in Helsinki based on Jam detection}\label{fig:tjd_screenshot}
 \end{figure}
 
-\subsubsection*{Architecture Description}
+\subsubsection*{\bf Architecture Description}
 
 The JamDetector module simplified architecture is visualized in the
 Figure \ref{fig:tjd_architecture}. The public transportation systems
@@ -88,7 +88,7 @@ Data format & JSON \\ \hline
 \caption{Jam Detection Module Details}
 \end{figure}
 
-\subsubsection*{Live+Gov SaaS solution compatibility}
+\subsubsection*{\bf Live+Gov SaaS solution compatibility}
 
 The JamDetector follows Live+Gov SaaS architecture. This means that
 all connecting clients are authorized. Also the JamDetector provides
@@ -103,98 +103,98 @@ vehicles participating the detected jam and vehicle’s nearest
 stop/station. This information can be used to visualize the jam
 location for the users.
 
-\subsection*{Data structure}
+% \subsection*{Data structure}
 
-The data structure of the JSON-message is described in figure \ref{fig:tjd_datastructure}.
+% The data structure of the JSON-message is described in figure \ref{fig:tjd_datastructure}.
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.5 \textwidth]{img/tjd/data_structure.jpg}
-\caption{JSON data structure}\label{fig:tjd_datastructure}
-\end{figure}
+% \begin{figure}[htbp]
+% \centering
+% \includegraphics[width=0.5 \textwidth]{img/tjd/data_structure.jpg}
+% \caption{JSON data structure}\label{fig:tjd_datastructure}
+% \end{figure}
 
-Example of a given message:
+% Example of a given message:
 
-\begin{verbatim}
-URL /jamdetector/JamService.svc/jams/hsl
+% \begin{verbatim}
+% URL /jamdetector/JamService.svc/jams/hsl
 
-[ { "Id" : 0,
-    "IsJam" : true,
-    "SlowVehicles" : [ { "CumulativeDelay" : 13,
-          "NextStop" : { "Code" : "1301453",
-              "Latitude" : 60.197929999999999,
-              "Longitude" : 24.876580000000001,
-              "Name" : "Laajalahden aukio"
-            },
-          "PreviousStop" : { "Code" : "1301455",
-              "Latitude" : 60.195390000000003,
-              "Longitude" : 24.873429999999999,
-              "Name" : "Tiilimäki"
-            },
-          "Stop" : { "Code" : "1301455",
-              "Latitude" : 60.195390000000003,
-              "Longitude" : 24.873429999999999,
-              "Name" : "Tiilimäki"
-            },
-          "Vehicle" : { "Delay" : 13,
-              "Id" : "RHKL00076",
-              "IsOnStop" : false,
-              "Latitude" : 24.873405999999999,
-              "LineDirection" : 2,
-              "LineId" : "1004",
-              "Longitude" : 60.195535999999997,
-              "NextStopIndex" : 2,
-              "Time" : "20140116-102700",
-              "Timestamp" : "/Date(1389860820413+0200)/"
-            }
-        },
-        { "CumulativeDelay" : 72,
-          "NextStop" : { "Code" : "1240419",
-              "Latitude" : 60.203020000000002,
-              "Longitude" : 24.96584,
-              "Name" : "Kyläsaarenkatu"
-            },
-          "PreviousStop" : { "Code" : "1230410",
-              "Latitude" : 60.204529999999998,
-              "Longitude" : 24.96998,
-              "Name" : "Toukoniitty"
-            },
-          "Stop" : { "Code" : "1230410",
-              "Latitude" : 60.204529999999998,
-              "Longitude" : 24.96998,
-              "Name" : "Toukoniitty"
-            },
-          "Vehicle" : { "Delay" : 82,
-              "Id" : "RHKL00065",
-              "IsOnStop" : false,
-              "Latitude" : 24.968769999999999,
-              "LineDirection" : 2,
-              "LineId" : "1006",
-              "Longitude" : 60.203980999999999,
-              "NextStopIndex" : 3,
-              "Time" : "20140116-102700",
-              "Timestamp" : "/Date(1389860820405+0200)/"
-            }
-        }
-      ],
-    "SlowVehiclesInJamCount" : 2
-  } ]
-]
-\end{verbatim}
+% [ { "Id" : 0,
+%     "IsJam" : true,
+%     "SlowVehicles" : [ { "CumulativeDelay" : 13,
+%           "NextStop" : { "Code" : "1301453",
+%               "Latitude" : 60.197929999999999,
+%               "Longitude" : 24.876580000000001,
+%               "Name" : "Laajalahden aukio"
+%             },
+%           "PreviousStop" : { "Code" : "1301455",
+%               "Latitude" : 60.195390000000003,
+%               "Longitude" : 24.873429999999999,
+%               "Name" : "Tiilimäki"
+%             },
+%           "Stop" : { "Code" : "1301455",
+%               "Latitude" : 60.195390000000003,
+%               "Longitude" : 24.873429999999999,
+%               "Name" : "Tiilimäki"
+%             },
+%           "Vehicle" : { "Delay" : 13,
+%               "Id" : "RHKL00076",
+%               "IsOnStop" : false,
+%               "Latitude" : 24.873405999999999,
+%               "LineDirection" : 2,
+%               "LineId" : "1004",
+%               "Longitude" : 60.195535999999997,
+%               "NextStopIndex" : 2,
+%               "Time" : "20140116-102700",
+%               "Timestamp" : "/Date(1389860820413+0200)/"
+%             }
+%         },
+%         { "CumulativeDelay" : 72,
+%           "NextStop" : { "Code" : "1240419",
+%               "Latitude" : 60.203020000000002,
+%               "Longitude" : 24.96584,
+%               "Name" : "Kyläsaarenkatu"
+%             },
+%           "PreviousStop" : { "Code" : "1230410",
+%               "Latitude" : 60.204529999999998,
+%               "Longitude" : 24.96998,
+%               "Name" : "Toukoniitty"
+%             },
+%           "Stop" : { "Code" : "1230410",
+%               "Latitude" : 60.204529999999998,
+%               "Longitude" : 24.96998,
+%               "Name" : "Toukoniitty"
+%             },
+%           "Vehicle" : { "Delay" : 82,
+%               "Id" : "RHKL00065",
+%               "IsOnStop" : false,
+%               "Latitude" : 24.968769999999999,
+%               "LineDirection" : 2,
+%               "LineId" : "1006",
+%               "Longitude" : 60.203980999999999,
+%               "NextStopIndex" : 3,
+%               "Time" : "20140116-102700",
+%               "Timestamp" : "/Date(1389860820405+0200)/"
+%             }
+%         }
+%       ],
+%     "SlowVehiclesInJamCount" : 2
+%   } ]
+% ]
+% \end{verbatim}
 
-In this example the JamDetector has detected one jam and there are two
-vehicles in the jam. In addition to the vehicle information the next,
-previous and nearest stop information is returned. The jam location
-can be approximated either from the participating vehicle locations or
-stop locations.  The interface contains more information than the
-current clients require. This is for debugging and possible
-visualization purposes. For example vehicle’s line information is such
-information.
+% In this example the JamDetector has detected one jam and there are two
+% vehicles in the jam. In addition to the vehicle information the next,
+% previous and nearest stop information is returned. The jam location
+% can be approximated either from the participating vehicle locations or
+% stop locations.  The interface contains more information than the
+% current clients require. This is for debugging and possible
+% visualization purposes. For example vehicle’s line information is such
+% information.
 
-If there are no jams currently detected, the interface returns:
-\begin{verbatim}
-[]
-\end{verbatim}
+% If there are no jams currently detected, the interface returns:
+% \begin{verbatim}
+% []
+% \end{verbatim}
 
 
 \subsection{Evaluation}
