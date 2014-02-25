@@ -1,21 +1,7 @@
-UCI-MAN-DT
-
-\begin{tabular}{|l|rrrrrr|} \hline
-Activitites & laying & sitting & stainding & walking & stairs down & stairs up\\
-\hline
-laying & 664 & 0 & 0 & 0 & 0 & 0\\
-sitting & 0 & 542 & 64 & 0 & 0 & 0\\
-standing & 0 & 135 & 521 & 0 & 0 & 0\\
-walking & 0 & 0 & 0 & 1468 & 162 & 101\\
-stairs down & 0 & 0 & 0 & 294 & 205 & 41\\
-stairs up & 0 & 0 & 0 & 193 & 21 & 273\\
-\hline
-\end{tabular}
-
-UKOB-MAN-DT
-
+{\bf DT-MAN-UKOB}
+\begin{center}
 \begin{tabular}{|l|rrrrr|} \hline
-Activities & cycling & running & sitting & stairs & walking\\
+ & cycling & running & sitting & stairs & walking\\
 \hline
 cycling & 1290 & 3 & 0 & 2 & 184\\
 running & 0 & 30 & 0 & 0 & 29\\
@@ -24,21 +10,10 @@ stairs & 15 & 0 & 1 & 92 & 127\\
 walking & 142 & 11 & 0 & 812 & 784\\
 \hline
 \end{tabular}
+\end{center}
 
-UCI-PCA-DT
-
-\begin{tabular}{|l|rrrr|} \hline
-Activities & laying & sitting & standing & walking\\
-\hline
-laying & 664 & 0 & 0 & 0\\
-sitting & 22 & 519 & 28 & 37\\
-standing & 0 & 126 & 512 & 18\\
-walking & 0 & 25 & 21 & 1685\\
-\hline
-\end{tabular}
-
-UKOB-PCA-DT
-
+{\bf DT-PCA-UKOB}
+\begin{center}
 \begin{tabular}{|l|rrrrr|} \hline
  & cycling & running & sitting & stairs & walking\\
 \hline
@@ -49,11 +24,12 @@ stairs & 0 & 33 & 0 & 80 & 122\\
 walking & 6 & 729 & 0 & 80 & 122\\
 \hline
 \end{tabular}
+\end{center}
 
-UKOB-MAN-SVM
-
+{\bf SVM-MAN-UKOB}
+\begin{center}
 \begin{tabular}{|l|rrrrr|} \hline
-activities & cycling & running & sitting & stairs & walking\\
+ & cycling & running & sitting & stairs & walking\\
 \hline
 cycling & 1289 & 1 & 11 & 16 & 147\\
 running & 0 & 59 & 0 & 0 & 0\\
@@ -62,9 +38,52 @@ stairs & 12 & 0 & 0 & 75 & 140\\
 walking & 57 & 0 & 1 & 60 & 1631\\
 \hline
 \end{tabular}
+\end{center}
 
-UCI-MAN-SVM
+{\bf SVM-PCA-UKOB}
+\begin{center}
+\begin{tabular}{|l|rrrrr|} \hline
+ & cycling & running & sitting & stairs & walking\\
+\hline
+cycling & 1020 & 4 & 64 & 1 & 390\\
+running & 38 & 0 & 0 & 0 & 21\\
+sitting & 0 & 0 & 779 & 0 & 0\\
+stairs & 203 & 1 & 0 & 3 & 28\\
+walking & 1206 & 5 & 0 & 12 & 526\\
+\hline
+\end{tabular}
+\end{center}
 
+{\bf DT-MAN-UCI}
+\begin{center}
+\begin{tabular}{|l|rrrrrr|} \hline
+ & laying & sitting & stainding & walking & stairs down & stairs up\\
+\hline
+laying & 664 & 0 & 0 & 0 & 0 & 0\\
+sitting & 0 & 542 & 64 & 0 & 0 & 0\\
+standing & 0 & 135 & 521 & 0 & 0 & 0\\
+walking & 0 & 0 & 0 & 1468 & 162 & 101\\
+stairs down & 0 & 0 & 0 & 294 & 205 & 41\\
+stairs up & 0 & 0 & 0 & 193 & 21 & 273\\
+\hline
+\end{tabular}
+\end{center}
+
+{\bf DT-PCA-UCI}
+\begin{center}
+\begin{tabular}{|l|rrrr|} \hline
+ & laying & sitting & standing & walking\\
+\hline
+laying & 664 & 0 & 0 & 0\\
+sitting & 22 & 519 & 28 & 37\\
+standing & 0 & 126 & 512 & 18\\
+walking & 0 & 25 & 21 & 1685\\
+\hline
+\end{tabular}
+\end{center}
+
+{\bf SVM-MAN-UCI}
+\begin{center}
 \begin{tabular}{|l|rrrrrr|} \hline
  & laying & sitting & standing & walking & stairs down & stairs up\\
 \hline
@@ -76,22 +95,10 @@ stairs down & 0 & 3 & 0 & 291 & 230 & 16\\
 stairs up & 0 & 0 & 0 & 185 & 15 & 287\\
 \hline
 \end{tabular}
+\end{center}
 
-UKOB-PCA-SVM
-
-\begin{tabular}{|l|rrrrr|} \hline
- & cycling & running & sitting & stairs & walking\\
-\hline
-cycling & 1020 & 4 & 64 & 1 & 390\\
-running & 38 & 0 & 0 & 0 & 21\\
-sitting & 0 & 0 & 779 & 0 & 0\\
-stairs & 203 & 1 & 0 & 3 & 28\\
-walking & 1206 & 5 & 0 & 12 & 526\\
-\hline
-\end{tabular}
-
-UCI-PCA-SVM
-
+{\bf SVM-PCA-UCI}
+\begin{center}
 \begin{tabular}{|l|rrrrrr|} \hline
  & laying & sitting & standing & walking & stairs down & stairs up\\
 \hline
@@ -103,6 +110,7 @@ stairs down & 21 & 2 & 79 & 432 & 5 & 1\\
 stairs up & 6 & 1 & 31 & 432 & 7 & 10\\
 \hline
 \end{tabular}
+\end{center}
 
 
 %%% Local Variables:

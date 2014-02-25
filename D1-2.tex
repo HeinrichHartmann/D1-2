@@ -25,16 +25,16 @@
 
 \LGactualdate{Month 26, February 2014}
 
-\LGtask{T1.1, T1.2, T1.3}
+\LGtask{T1.2, T1.3}
 
 \LGtype{Prototype}
 
 %\LGnature{$<$ Report $|$ Prototype $|$ Demonstrator $|$ Other $>$}
 
-%\LGapproved % activate only if approved
+% \LGapproved % activate only if approved
 \LGdraft
 
-\LGversion{Beta 0.10}
+\LGversion{1.0}
 %\LGstaffmonths{Resources spent on the deliverable}
 
 %\LGdistribution{WP leaders, PMB members, European Commission}
@@ -46,15 +46,14 @@
 %{\tt\char92 par}.)}
 \LGabstract{ 
 
-  In this deliverable we present several reality mining methods as
-  well as an improved version of the sensor collection service.  The
-  reality mining services include Human Activity Recognition, Service
-  Line Detection, Traffic Jam Detection and have been integrated into
-  the Live+Gov toolkit.
+  In this deliverable we present several reality mining methods and an
+  improved version of the sensor collection service.  These methods
+  allow the extraction of context information form sensor data
+  collected on the mobile device. In particular we include a Human
+  Activity Recognition component, a Service Line Detection component
+  and a Traffic Jam Detection component. These components are
+  implemented in a generic way and integrated into the Live+Gov toolkit.  
 
-  The deliverable is accompanied with source code and technical
-  documentation as well was precompiled packages of the
-  implementations.
 
 }
 
@@ -111,8 +110,11 @@
 \LGaddhistory{0.7}{2014-01-24}{Added description of Sensor Collector}{Heinrich Hartmann}
 \LGaddhistory{0.8}{2014-01-31}{Added Traffic Jam Module Description}{Laura Niittyl\"a}
 \LGaddhistory{0.9}{2014-02-04}{Added SVM Classifier Description}{Elisavet Chatzilari}
-\LGaddhistory{0.10}{2014-02-06}{Revised section on Human Activity
-  Recognition}{Heinrich Hartmann}
+\LGaddhistory{0.10}{2014-02-06}{Revised section on Human Activity Recognition}{Heinrich Hartmann}
+\LGaddhistory{0.11}{2014-02-20}{Incorporated feedback from internal
+  reviews.}{Heinrich Hartmann}
+\LGaddhistory{0.12}{2014-02-20}{Final corrections and revision of figures.}{Heinrich Hartmann}
+\LGaddhistory{1.0}{2014-02-25}{Release of final version to the consortium.}{Heinrich Hartmann}
 \end{LGhistory}
 
 
@@ -147,33 +149,73 @@
 
 
 \begin{LGExecutiveSummary}
-  \vspace{10pt} 
+\vspace{10pt} 
 
-\todo{HH}{Expand Summary}
+In this deliverable we present several data mining methods that are
+used to extract context information from the reality of citizens.  In
+addition we report on the ongoing improvements to our sensor
+collection architecture and communication interfaces.
 
-Upshot:
-\begin{itemize}
-\item Present Improved Sensor Collector. Better performance for
-  recording on low end devices. New sensor Exchange format.
-  Cross Platform Implementation in Titanium available. But technical
-  problems prohibit further use of this technology.
-\item Human Activity Recognition Classifier. Fully integrated and used
-  in trial. Two data-sets collected. Evaluation of 4 different
-  methods. Found good results with manual features and decision
-  trees. Maximum classification accuracy of 84 \% still below 
-  literature accuracy of 97\% with multimodal SVM.
-\item Service Line Detection. Fully integrated and used in trial. Two
-  stage algorithm that makes use of HSL live data.
-\item Traffic Jam Detection. Fully integrated and used in trial.
-\item Research on Distribued Geo Matching linking social media to
-  public transportation.
-\item Publication on Geographic topic analysis.
-\end{itemize}
+The revised sensor collector provides improvements on recording
+performance on low end devices, battery awareness and communication
+interfaces. We present a newly designed sensor exchange format that
+allows continues streaming of sensor information and implement a
+streaming API for real time monitoring of mobile sensors.
 
+We provide a Human Activity Recognition component that has been
+trained to detect multiple activities of human ambulation (sitting,
+standing, walking, running, cycling, stairs, lying). The classifier is
+deployed on a mobile device, integrated into the toolkit architecture
+and tested in the mobility field trial.  Furthermore, we have trained
+several different machine learning models for this task and evaluated
+the results against each other as well as against state of the art
+classifiers. Our best classification accuracy remains with 84 \% still
+below the reported accuracy of 97\% in the literature. We are
+confident that we can improve our method quickly based on the built up
+infrastructure.
 
+The Service Line Detection component is capable of detecting the
+precise service line used by a citizen based on the GPS sensor
+information captured on the mobile device. The detection is performed
+in a two-stage process that compares the received coordinates to
+real-time GPS positions of public transportation vehicles and in a
+second step to interpolated vehicle positions from time-table and
+vehicle track data. Also this service is fully integrated into the
+Live+Gov SaaS toolkit and has been successfully tested in the first
+field trial.
+
+The Traffic Jam Detection component is able to detect irregularities
+in public transportation systems that provide real-time data about
+vehicles. It has been integrated into the Live+Gov toolkit as part of
+the Server Side Mining Service (C9). Although a thorough evaluation of
+the detection quality is difficult to perform, a comparison to other
+commercially available services shows promising results, with only
+minor differences.
+
+The sensor collector as well as other mobile components remain limited
+to the Android platform. Despite several efforts, that are explained
+in section \ref{sec:cross_platform}, our prototypes based on a hybrid
+cross-platform development framework were not be able to deliver the
+intended results. Therefore, as described in D1.1, we have to fall
+back on native development of the individual components on multiple
+mobile platforms. 
+
+In section \ref{sec:DGM} we present research results on Distribued Geo
+Matching, that allow to link social media posts (most importantly from
+Twitter\footnote{\url{http://www.twitter.com}}) to vehicles of public
+transportation that they originate from. The approach addresses the
+problem of handling the high volume of incoming vehicle position
+updates in a distributed computing architecture.
+
+We conclude this deliverable with a report on Geographic Topic
+Analysis in section \ref{sec:GTA}. The presented method is able to
+extract latent topics form reports of issues in the urban environment.
+These topics take into account information about category of the
+reported issue as well as geographic proximity. This new method was
+shown to be superior to current state of the art geographic topic
+models in the publication \cite{CCK1}.
 
 \end{LGExecutiveSummary}
-
 
 % add a \LGaddabbreviation{ABBR}{Explanation} for each abbreviation
 \begin{LGAbbreviations}
@@ -242,78 +284,113 @@ Upshot:
 \chapter{Introduction}
 \label{chap:Introduction}
 
-\todo{HH}{Expand Introduction}
+The ambition of the Live+Gov project is to develop applications for
+closing the emerging gap between the citizens and the policy makers by
+the help of mobile technologies. These applications provide enhanced
+communication channels between the authorities and the citizens, which
+facilitate increased transparency, direct participation and
+opportunities for collaboration (cf. D2.1). 
 
-The following description of the deliverable was given in the DoW:
+In order to meet this goals Live+Gov makes use of the advanced
+possibilities that are offered by moderns smart-phone devices which
+are becoming widely available to the public. In particular, these
+devices are equipped with a rich set of sensors, that allow to infer
+information about the environment and context the citizen is currently
+placed in. In this deliverable we present several data mining
+techniques that allow to extract valuable context information from raw
+sensor data. For instance, we recognize the current ambulation mode of
+the user (e.g. walking or standing) in Section \ref{sec:HAR} and
+detect the use of public transportation in Section \ref{sec:SLD}.
+These data mining methods are implemented as generic services and
+integrated into the Live+Gov toolkit as part of the Mobile Sensor
+Mining Component (C15) and the Server Side Mining Service (C8)
+(cf. Figure \ref{fig:toolkit}). The extracted context information can
+be used to personalize the user experience (cf. WP3) of the use case
+applications or analyze the behavior and service needs of the
+citizens.
 
-\begin{center}
-  \begin{minipage}{0.8 \textwidth}
-    {\bf Sensor Data App with Mining Functionality.} \\
-    This deliverable will provide the extended version of the data
-    capturing prototype for mobile devices, with implemented reality
-    mining methods and optimized communication interfaces for result
-    transmissions to the application server.
-\end{minipage}
-\end{center}
+In this deliverable we also provide an improved and extended version
+of the Mobile Sensor Collection Component (C14). The improvements
+contain in particular enhancements of the communication interfaces. We
+provide a new real-time streaming API as well as a revised sensor data
+format (ssf) cf. Section \ref{sec:ssf}.
 
-Upshot:
-\begin{itemize}
-\item Context of Deliverable in L+G project:
-  a) Continuation of work on sensor collection.
-  b) Development of reality mining methods for use in field trials.
-\item Integrate components into L+G toolkit to ensure reusability and
-  facilitate collaboration between partners. Present Components 
-  {\bf Server Side Mining Service} and {\bf Mobile Sensor Mining Component}.
-\end{itemize}
-
-\begin{figure}
+\begin{figure}[ht]
   \centering
-  \includegraphics[width = 0.8 \textwidth]{img/intro/architecture.png}
+  \includegraphics[width = 0.9
+  \textwidth]{img/intro/toolkit_architecture.png}
+  \label{fig:toolkit}
   \caption{Live+Gov Toolkit Architecture}
 \end{figure}
-
-
-% Task Descriptions from the DOW:
-% \begin{itemize}
-% \item[T1.1] {\bf Sensor and user input data capturing} \\
-%   This task will first define a taxonomy of classifications that are useful to
-%   determine for contextualization of citizens’ uploads including activity
-%   profiles (e.g. walking, cycling, riding train, riding bus,...) and coarse
-%   issue classifications (street, people, traffic,...). Research investigations
-%   will determine how these categories can be captured and classified
-%   economically using limited battery power (e.g. trading off between power
-%   draining sensors like GPS or audio by less expensive ones like accelerator
-%   monitoring) and limited bandwidth to the Live+Gov backbone server. The task
-%   also comprises the contextualized capturing of citizen text, deictic or voice
-%   input while accounting for limitations of mobile hardware and communication
-%   channels.
-% \item[T1.2] {\bf Smartphone based reality mining} \\
-%   In this task we will develop memory and energy aware mining mechanisms for
-%   exploiting data collected in T1.1 for various kinds of initial processing on
-%   mobile devices - including classification, filtering, abstraction, and
-%   personalization. The key concern of our development will be on wide usability
-%   of reality mining methods and their flexible applicability for dynamic user
-%   contextualization in project scenarios.
-% \item[T1.3] {\bf Server based reality mining} \\
-%   Based on limited analysis of data in T1.2 and based on citizens’ preferences
-%   and explicit consent, (possibly) abstracted sensor data will be uploaded to
-%   the Live+Gov backbone where further mining will occur. We will develop mining
-%   methods which are needed for the application, but cannot be run on individual
-%   smartphones (e.g.  because input from multiple users is needed). In
-%   particular, this will comprise the detection of common patterns delivered from
-%   many citizens, but also outlier detection and treatment, which is required to
-%   discover spoofing or important emergencies. The methods resulting from this
-%   task will be particularly relevant for supporting augmented reality
-%   applications (WP3) and contextualization of data mining results in eGovernance
-%   scenarios in line with policy models (WP2).
-% \end{itemize}
-
 
 
 \clearpage
 \chapter{Sensor Collection Service}
 \label{chap:sc}
 \input{sections/SensorCollector}
+
+\clearpage
+\section{Cross Platform Development}
+\label{sec:cross_platform}
+
+In order to reach as many citizens as possible with our efforts, it is
+important to have the mobile components available on multiple
+platforms (e.g. Android, iOS). In deliverable D1.1 we have evaluated
+different methods for mutiple platform sensor collection and reality
+mining. The basic three possible pathways are (cf. D4.1):
+\begin{enumerate}
+\item {\bf Native development} of all components for all platforms.
+\item {\bf Web-based applications} exploit HTML5 and advanced APIs
+  offered by mobile browsers to provide services on the mobile phone.
+\item {\bf Hybrid development} uses native wrapper frameworks like
+  PhoneGap\footnote{\url{http://phonegap.com/}} or
+  Titanium\footnote{\url{http://www.appcelerator.com/}} that provide
+  access to native platform and hardware features.
+\end{enumerate}
+
+The evaluation criteria included necessary sensor sampling
+frequencies, native communication facilities and support for
+background services. It was found, that the Titanium framework was
+is able to fulfill all three requirements. On the basis of this
+evaluation we proposed to implement the mobile reality mining 
+services using this framework.
+
+In due course we have started to implement prototypes of sensor
+processing applications, such as the {\it
+  TitaniumSensorCollector}-package which is provided alongside with
+this deliverable.  It turned out, however, that it is not possible to
+collect sensor data while running in the background with Titanium. Our
+prior evaluation covered both requirements, but it was not tested if
+it was cover both requirements at the same time. We were very
+surprised to learn that those requirements cannot be met in parallel.
+
+For the practical use of the component, the support for sensor
+recordings in the background is very important. Indeed, the
+classification of human activities is performed while the device is
+worn in a pocket, in which case the display is typically switched
+off and the application is running in the background.
+
+As stated in D1.1, we propose independent {\bf native implementation}
+as fallback solution in this case. Our initial development is focused
+on the Android platform. Using a conversion toolkit we have been able
+to port some components (e.g. the sensor collector) to Blackberry.
+For support of iOS further development is necessary.
+
+It has to be noted, that independent native development is associated
+with high additional effort, as the development environments and APIs
+are very different from each other. It has to be assessed if the
+resources of the project shall be spent on this task, or rather in
+improving the quality of the existing Android implementations.
+
+In the view of these difficulties we have taken steps to reduce the
+amount of computation performed on the mobile device. In analogy to
+the image recognition task described in D3.1, it is possible to deploy
+parts of the logic on a central server. Currently our Service Line
+Detection component (c.f. section \ref{sec:SLD}) is implemented in
+such a way, thereby paving the way for an iOS port of the Mobility
+Field Trial Application. A similar solution is planned for the Human
+Activity Recognition Component described in section \ref{sec:HAR}.
+
 
 \clearpage
 \chapter{Reality Mining Methods}
@@ -352,6 +429,7 @@ lead to a publication \cite{CCK1}.
 \label{sec:GTA}
 \input{sections/TopicModels}
 
+\clearpage
 \bibliography{D1-2}
 
 \end{document}

@@ -5,15 +5,15 @@
 
 \newcommand{\IR}{\mathbb{R}}
 
-In this section we describe the implementation of the human acitivity
+In this section we describe the implementation of the human activity
 recognition ('HAR') component on the mobile device.  The algorithmic
-foundation of this data mining task have been described in detail in
+foundations of this data mining task have been described in detail in
 deliverable D2.2 in section 3.2 ``Mobile Sensing and activity
 recognition''. We include a brief summary here (\ref{sec:har_method})
 for the sake of completeness. Subsection \ref{sec:har_component}
 contains the descriptions of the implementation. In subsection
-\ref{sec:har_eval} we evaluate our method to the on two data sets and
-compare it to the state of the art approaches.
+\ref{sec:har_eval} we evaluate our method on two data sets and compare
+it to the state of the art approaches.
 
 \subsection{HAR Method Summary}\label{sec:har_method}
 
@@ -85,10 +85,12 @@ pipeline (cf. Figure \ref{fig:classification_architecture}).
     constructor parameters a window-length and a delay. Incoming
     sensor samples are grouped in windows of the given length and
     passed further down as a single object.
-  \item {\bf Interpolation and Quality Check.}  To remove frequency
-    disparity and ignore timeframes below a set sample frequency a
-    quality check is in place. After the check, all windows get
-    interpolated to a constant frequency of $50Hz$.
+  \item {\bf Interpolation and Quality Check.}  
+    The recorded sensor data can be subject so several irregularities,
+    like frequency disparities or small outtakes. To ensure that those
+    irregularities do not pollute the training data we perform quality
+    checks on the individual windows and interpolate the samples to a
+    constant frequency of $50Hz$.
   \item {\bf Feature Calculation.} The classification calculates
     different features extracted from windows of raw sampling data. A
     description of the used features is included in section
@@ -354,7 +356,7 @@ maximizes the margin between the two classes
 \begin{figure}[h]
 \centering
   \includegraphics[width=0.5\textwidth]{img/svms/Svms_hypothesisSpace.pdf}
-  \caption{Left: Hypothesis space including all linear separations. Right: The selected hypothesis maximizes the margin.}
+  \caption[Hypothesis spaces for SVM classifier.]{Left: Hypothesis space including all linear separations. Right: The selected hypothesis maximizes the margin.}
   \label{fig:svm_hypothesisSpace}
 \end{figure}
 
@@ -483,11 +485,11 @@ and was gathered by Davide Anguita, et. al. \cite{Anguita} in 2012.
 It contains around $700K$ collected by 30 volunteers.
 
 The number of samples per activity of both datasets are summarized in
-Figure \ref{fig:har_datasets}. Both datasets contain only
+Table \ref{fig:har_datasets}. Both datasets contain only
 accelerometer samples, and have been preprocessed that have been
 sampled at a fixed rate of $50Hz$.
 
-\begin{figure}[h]
+\begin{table}[h]
 \centering
 \begin{tabular}{|l|r|r|} \hline
 Activity  & UCI Dataset & UKOB Dataset \\ \hline
@@ -502,7 +504,7 @@ Totals    & 659.136     & 903.156       \\ \hline
 \end{tabular}
 \caption{Number of accelerometer samples by activity and dataset.}
 \label{fig:har_datasets}
-\end{figure}
+\end{table}
 
 Both datasets have been split into a training data-set and a test
 data-set. The individual parts contain only full recordings of the
@@ -523,11 +525,11 @@ We get the following evaluation results:
   {\bf Classifier} & {\bf Features} & {\bf Dataset} & {\bf Accuracy in \%} \\ \hline
   DT	& MAN	& UKOB	&	$62$ \\ 
   DT	& PCA	& UKOB	&	$45$\\ 
-  SVM	& MAN	& UKOB	&	$87$\\ 
+  SVM	& MAN	& UKOB	& 	$\mathbf{87}$\\ 
   SVM	& PCA	& UKOB	&	$54$\\
-  DT	& MAN	& UCI	&	$78$ \\ 
-  DT	& PCA	& UCI	&	$92$ \\ 
-  SVM	& MAN	& UCI	&	$85$ \\ 
+  DT	& MAN	& UCI	&	$83$ \\ 
+  DT	& PCA	& UCI	&	$68$ \\ 
+  SVM	& MAN	& UCI	& 	$\mathbf{ 85 }$ \\ 
   SVM	& PCA	& UCI	&	$64$ \\ \hline
 \end{tabular}
 \end{center}
@@ -535,7 +537,7 @@ We get the following evaluation results:
 Figure \ref{fig:har_eval} shows a plot of these accuracy values.
 \begin{figure}[ht]
   \centering
-  \includegraphics[width= 0.5 \textwidth]{img/har/accuracy_plot.png}
+  \includegraphics[width= 0.6 \textwidth]{img/har/accuracy_plot.png}
   \caption{Classification accuracy of HAR classifiers}
   \label{fig:har_eval}
 \end{figure}
@@ -548,26 +550,34 @@ Our integrated application relies on a decision tree and manual
 features, which show significantly weaker performance (64\%) than
 state of the art in our experiments.
 
-It is hard to see clear trends from the evaluation results.  For the
-UCI dataset, a decision tree trained on PCA-features performs best.
-For the UKob dataset it is the SVM based on manual features. There
-are several possible reasons, for this phenomenon.  Firstly, the UKob
-dataset contains different activities than UCI, e.g. a large number
-samples is recorded for the cycling activity, which is not present at
-UCI, and conversely no samples for the lying task are present. It is
-possible, that certain classifier and feature combinations are more
-suitable for one set of activities, than for the other. Another
-anomaly in our data is the fact, that we were not able to recognize
-the activity ``sitting'' in our data. 
+For both datasets the SVM trained on manual features performes best.
+Although there are several parameters in the PCA feature extraction,
+that remain to be optimized, the evaluation results suggest that
+manually selected features yield better results.  For the UCI dataset
+the decision tree is only slightly worse than the SVM based classifier
+whereas the UKob dataset shows a more significant drop of
+accuracy. This might be due to the fact that UKob dataset contains
+slightly different activities than UCI, e.g. a large number samples is
+recorded for the cycling activity, which is not present at UCI, and
+conversely no samples for the lying task are present.
 
-Upshot:
-\begin{itemize}
-\item  Decision tree on manual features has acceptable performance
-\item  Annomalies in Confusion Matrices: Sitting is not detected in UKOB dataset.
-\end{itemize}
+% Another anomaly is visible in the confusion matrices (cf. section
+% \ref{sec:confusion_matrices}), is that we were not able to recognize
+% the activity ``sitting'' in our own dataset. We do not currently have
+% a good explanation of this anomaly. It points to structural problems
+% in our approach, that need to be investigated further.
 
-\subsubsection*{\bf Confusion Matrices}
-\input{sections/confusion}
+In conclusion, we have presented here a working HAR classification
+architecture, that has been fully integrated into a mobile device and
+has been evaluated against state of the art classifiers from the
+literature on different datasets. Although the classification
+accuracies are still behind state of the art, we are confident that we
+can improve our methods exploiting the built up infrastructure.
+
+% \clearpage
+% \subsubsection{\bf Confusion Matrices}
+% \label{sec:confusion_matrices}
+% \input{sections/confusion}
 
 
 %%% Local Variables:

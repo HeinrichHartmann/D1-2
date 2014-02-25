@@ -1,3 +1,10 @@
+In this section we are presenting a traffic jam detection module, that
+is able to detect irregularities in public transportation systems that
+provide real-time data about vehicles. It has been integrated into the
+Live+Gov toolkit as part of the Server Side Mining Service (C9), and
+was successfully used in the first Mobility Field Trial (cf. D5.1,
+D5.3) for the Helsinki metropolitan area.
+
 \subsection{Related work}
 
 Traffic fluency monitoring and jam detection is part of traffic
@@ -42,7 +49,6 @@ notice the delay and how fast it increases. Also, the jam is only
 detected if there are several vehicles filling the same criteria
 within the same area.  
 
-
 The module provides information about the nearest stop to the detected
 jam and also the previous stop from where the affected vehicles have
 come from. Based on this information current traffic situation is
@@ -76,7 +82,7 @@ Framework.
 \caption{Traffic Jam Module Architecture}\label{fig:tjd_architecture}
 \end{figure}
 
-\begin{figure}
+\begin{table}
 \centering
 \begin{tabular}{|l|l|}
 \hline
@@ -86,7 +92,7 @@ Protocol    & HTTP GET \\ \hline
 Data format & JSON \\ \hline
 \end{tabular}
 \caption{Jam Detection Module Details}
-\end{figure}
+\end{table}
 
 \subsubsection*{\bf Live+Gov SaaS solution compatibility}
 

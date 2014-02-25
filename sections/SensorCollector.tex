@@ -6,19 +6,19 @@
 \section{Mobile Sensor Collector}
 \label{sec:SensorColllection}
 
-In this deliverable we present the a revised sensor collection
+In this chapter we present the a revised sensor collection
 component. It offers the following improvements over the last version
 presented in D1.1:
 \begin{itemize}
 \item High performance recordings on Low-End devices. During the field
   trial some low-end devices showed difficulties to record the sensor
   samples with sufficient frequency. We streamlined the architecture
-  in order to reduced the overhead caused by the processing of the
+  in order to reduce the overhead caused by the processing of the
   samples. For example, we traded the convenience of a SQL database in
-  favor of the performance benefits of a flat file solution.  Also, in
-  this process we removed dependency on external SDCF
-  library\footnote{\url{http://www.sdcf.eu/}}, and reimplemented core
-  parts of the component.
+  favor of the performance benefits of a flat file solution.
+    % Also, in this process we removed dependency on external SDCF
+  % library\footnote{\url{http://www.sdcf.eu/}}, and reimplemented core
+  % parts of the component.
 \item Improved battery awareness. Power consumption in the sensor
   collection process is largely driven the GPS sensor. In May 2013
   Google released a new location API, that takes advantage of multiple
@@ -36,7 +36,7 @@ presented in D1.1:
 \item Streaming API. The streaming API is a new communication channel
   between the mobile sensor collector and the central server. It
   allows to transfer the incoming sensor data directly to the server
-  using the ssf format.
+  in real time. 
 \item Integration into Live+Gov Service Center. The revised sensor
   collector and sensor storage service is compatible with the Live+Gov
   service center. This feature allows central user management as well
@@ -53,8 +53,11 @@ presented in D1.1:
 
 \subsection{Architecture Description}
 
-The new architecture is sketched in Figure \ref{fig:sc_architecture}.
-It consists of the following components:
+The new architecture is sketched in Figure
+\ref{fig:sc_architecture}. It allows asynchronous collection and
+processing of the collected sensor samples and can be easily extended
+by plugins which are executed by the dispatcher thread. It consists of
+the following individual components:
 
 \begin{figure}[h]
 \centering
@@ -65,7 +68,7 @@ It consists of the following components:
 \begin{itemize}
 \item {\bf Sensor Event Thread}. The sensor event thread registers
   callback listeners for all configured sensors. When sensor events
-  occur the received values are serialized in the ssf
+  occur, the received values are serialized in the ssf
   format (cf. \ref{sec:ssf}) and pushed onto the SensorQueue.
 \item {\bf SensorQueue}. The sensor queue is a synchronized queue
   object that stores sensor values as strings.
@@ -75,14 +78,14 @@ It consists of the following components:
   and the activity recognition component, the streaming service and GPS
   publication pipeline (for use in the Service Line Detection API).
 \item {\bf Persistor}. The persistor service is executed by the
-  DispatcherThread and appends the received sensor sample into a
+  DispatcherThread and appends the received sensor samples into a
   predefined file. Also a variant with zip-file compression is
   included.
 \item {\bf TransferThread}. The transfer thread is an independent
   thread that transfers the persisted samples to the Live+Gov servers.
 \item {\bf Monitoring Thread}. The monitoring thread polls the
   different components and gathers run-time information like numbers
-  of processed samples or transfer state.
+  of processed samples or the transfer state.
 \item {\bf Service Controller}. The service controller starts and
   stops all threads, and takes care of proper configuration of all
   services. It listens to intents specified in the API and changes the
@@ -92,7 +95,7 @@ It consists of the following components:
 The supported sensors are summarized in Table
 \ref{fig:sensor_table}. They are unchanged from D1.1.
 
-\begin{figure}
+\begin{table}
 \centering
 \begin{tabular}{|l|p{0.7\linewidth}|}
   \hline
@@ -143,7 +146,7 @@ The supported sensors are summarized in Table
 \end{tabular}
 \caption{Supported sensors of the Sensor Collector}
 \label{fig:sensor_table}
-\end{figure}
+\end{table}
 
 \subsection{Intent API}
 \label{subsubsec:IntentAPIdescription}
@@ -177,7 +180,7 @@ an asterisk (*).
   and context mining, to make use of the recorded sensor data.
 \item {\bfseries Request Status Report.} When this intent is received
   a status report is broadcasted to the system. A summary of returned
-  information is shown in Figure \ref{tab:StatusIntent}.
+  information is shown in Table \ref{tab:StatusIntent}.
 \item {\bfseries Set user ID.*} Set the user id to a given value. This
   intent is used to connect the mining results to the user data in the
   Live+Gov service center.
@@ -192,7 +195,7 @@ is broadcasted to the system which provides information about whether
 the requested method call was successful. Further technical
 description of the component and the API are included in D4.1.
 
-\begin{figure}[ht]
+\begin{table}[ht]
 \centering
 \begin{tabular}{|l|l|l|} \hline
    Key       & Type    & Description                                       \\ \hline
@@ -204,21 +207,17 @@ description of the component and the API are included in D4.1.
 \end{tabular}
 \caption{Structure of status intents}
 \label{tab:StatusIntent}
-\end{figure}
+\end{table}
 
 \subsection*{Component Testing}
 
 The sensor collector comes accompanied with a testing GUI shown in
 Figure \ref{fig:sc_gui}, that provides buttons for the implemented
 intent controls API. The returned status information is displayed in
-the form of plain text logs, button states and spinners.
-
-The GUI can be used to test the functionality of the component and for
-the gathering of training data.
-
-In addition we provide automated unit-test cases for the intent API
-along with the source code.
-
+the form of plain text logs, button states and spinners.  The GUI can
+be used to test the functionality of the component and for the
+gathering of training data.  In addition we provide automated
+unit-test cases for the intent API along with the source code.
 
 \begin{figure}[h]
 \centering
@@ -229,7 +228,7 @@ along with the source code.
 \subsection{Sensor Stream Format (ssf)}\label{sec:ssf}
 The sensor stream format ({\it ssf}) which is used for transfering
 sensor values from a mobile device (or another sensor source) to the
-Live+Gov data-base. The file format is inspired by the
+Server Side Storage Service (C9). The file format is inspired by the
 \href{http://en.wikipedia.org/wiki/Common\_Log\_Format}{Common Log
   Format} used by many webservers. It replaces the XML-based format
 used in D1.1. We view incoming sensor values as events and record them
@@ -249,13 +248,21 @@ XML format are:
   recorded samples on a remote system.
 \end{itemize}
 
-The rows of the ssf-format have the following structure:
+The rows of the ssf-format have the following structure in ABNF\footnote{\url{http://tools.ietf.org/html/rfc5234}}:
 \small
 \begin{verbatim}
-SENSOR_PREFIX,TIME_STAMP, USER_ID, SENSOR_VALUES
+SSF = SENSOR_PREFIX "," TIME_STAMP "," USER_ID "," SENSOR_VALUES
+
+SENSOR_PRREFIX = "GPS" | "ACC" | "LAC" | "GRA" | "GYR" | "MAG" | \\
+                 "WIFI" | "BLT" | "GSM" | "ACT" | "ERR" | "TAG" 
+TIME_STAMP     = *DIGIT
+USER_ID        = *(ALPHA | DIGIT)
+SENSOR_VALUE   = *VCHAR
 \end{verbatim}
 \normalsize
 
+\clearpage
+The individual fields have the following semantics:
 \begin{itemize}
 \item \texttt{SENSOR PREFIX}. Identifies the sensor producing the
   sample. The following sensor prefixes are supported: \\
@@ -265,12 +272,12 @@ SENSOR_PREFIX,TIME_STAMP, USER_ID, SENSOR_VALUES
   (Wifi networks), \texttt{BLT} (Bluetooth), \texttt{GSM} (GSM cells),
   \texttt{ACT} (Google Play Services Activity), \texttt{ERR} (Error
   Value), \texttt{TAG} (Annotations entered by the user).
-\item \texttt{TIME STAMP} UNIX timestamp in milliseconds
+\item \texttt{TIME STAMP}. UNIX timestamp in milliseconds
   e.g. \texttt{1377609577214}
-\item \texttt{USER ID} ID that identifies records from the same
+\item \texttt{USER ID}. An ID that identifies records from the same
   user. The default value is the device-id that is provided by
   Android.
-\item \texttt{SENSOR VALUES} Sensor values in individual formats. In
+\item \texttt{SENSOR VALUES}. Sensor values in individual formats. In
   order to adhere to the CSV standard no \texttt{,}-symbol and
   new-lines may be used in this field.
   \begin{itemize}
@@ -294,7 +301,9 @@ SENSOR_PREFIX,TIME_STAMP, USER_ID, SENSOR_VALUES
   \end{itemize}
 \end{itemize}
 
-Example rows may look as follows:
+An example snippet from an ssf-file is provided in Figure \ref{fig:ssf_example}.
+
+\begin{figure}[hb]
 \small
 \begin{verbatim}
 ACC,1377605748123,5,0.9813749 0.0021324 0.0142523
@@ -306,6 +315,9 @@ BLT,1385988380374,bluetoothUser,"C8:F7:33:B7:B5:B4" \\
                   /computer/computer laptop/bonded/"LAPTOP"/-46
 \end{verbatim}
 \normalsize
+\caption{Example rows of the ssf format}
+\label{fig:ssf_example}
+\end{figure}
 
 \subsection{Streaming Service}\label{sec:straming}
 
@@ -314,16 +326,19 @@ service, that transfers recorded samples directly to a remote machine.
 The streaming service uses the ZeroMQ networking
 library\footnote{http://www.zeromq.org} to transfer single ssf lines
 to the Live+Gov machine running a streaming server. The streaming
-server appends the received samples to a file (zmq\_stream.ssf).
+server appends the received samples to a file (\texttt{stream.ssf}).
 
 This simple service allows direct monitoring of the recorded samples,
 via simple UNIX command line tools. 
-\begin{itemize}
-\item \texttt{tail -f zmq\_stream.ssf} - prints the recoded samples to the console.
-\item \texttt{tail -f zmq\_stream.ssf | grep GPS} - filters out GPS samples.
-\item \texttt{tail -f zmq\_stream.ssf | cut --delimiter=',' --field=1 | logtop}\\
-  shows the frequencies of the individual incoming sensor values.
-\end{itemize}
+
+\begin{tabular}{|l|l|}\hline
+\texttt{tail -f stream.ssf} & prints the recoded samples to the
+                              console. \\ \hline
+\texttt{grep <SENSOR PREFIX>} & filters out samples of a specific
+                                type. \\ \hline
+\texttt{logtop}  & shows the frequencies of the individual incoming
+                   sensor  values. \\ \hline
+\end{tabular}
 
 \section{Sensor Storage Service}
 
