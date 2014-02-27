@@ -9,8 +9,8 @@
 In this chapter we present the a revised sensor collection
 component. It offers the following improvements over the last version
 presented in D1.1:
-\begin{itemize}
-\item High performance recordings on Low-End devices. During the field
+\begin{description}
+\item[High performance recordings on Low-End devices] During the field
   trial some low-end devices showed difficulties to record the sensor
   samples with sufficient frequency. We streamlined the architecture
   in order to reduce the overhead caused by the processing of the
@@ -19,29 +19,29 @@ presented in D1.1:
     % Also, in this process we removed dependency on external SDCF
   % library\footnote{\url{http://www.sdcf.eu/}}, and reimplemented core
   % parts of the component.
-\item Improved battery awareness. Power consumption in the sensor
+\item[Improved battery awareness] Power consumption in the sensor
   collection process is largely driven the GPS sensor. In May 2013
   Google released a new location API, that takes advantage of multiple
   location provider and reduces the power consumption significantly.
   The revised component makes use of this new API, and offers a
   fallback in case the service is not supported by the device.
-\item Revised export format. We have improved the data exchange
+\item[Revised export format] We have improved the data exchange
   formats used for publishing samples to other components and storage
-  on the central server. In section \ref{sec:ssf} we specify the
+  on the central server. In Section \ref{sec:ssf} we specify the
   ssf-Sensor Stream Format, which is inspired by the
   \href{http://en.wikipedia.org/wiki/Common\_Log\_Format}{Common Log
-    Format} used by many webservers. It allows easy human inspection
+    Format} used by many web servers. It allows easy human inspection
   and processing by standard (UNIX) tools like ``grep'' and ``sed''
   while being reasonably memory efficient.
-\item Streaming API. The streaming API is a new communication channel
+\item[Streaming API] The streaming API is a new communication channel
   between the mobile sensor collector and the central server. It
   allows to transfer the incoming sensor data directly to the server
   in real time. 
-\item Integration into Live+Gov Service Center. The revised sensor
+\item[Integration into Live+Gov Service Center] The revised sensor
   collector and sensor storage service is compatible with the Live+Gov
   service center. This feature allows central user management as well
   as health monitoring and centralized log aggregation of the services.
-\item Seamless Extendability. The revised architecture can be easily
+\item[Seamless Extendability] The revised architecture can be easily
   extended by further stream processing components. This is realized
   by a dispatcher thread that distributes sensor samples to registered
   components over a simple interface (again using ssf). Implemented
@@ -49,7 +49,7 @@ presented in D1.1:
   (c.f. section \ref{sec:HAR}) and a GPS-sample publisher component
   that is used by the Service Line Detection service (cf. section
   \ref{sec:SLD}).
-\end{itemize}
+\end{description}
 
 \subsection{Architecture Description}
 
@@ -65,32 +65,32 @@ the following individual components:
 \caption{Sensor Collection Architecture}\label{fig:sc_architecture}
 \end{figure}
 
-\begin{itemize}
-\item {\bf Sensor Event Thread}. The sensor event thread registers
+\begin{description}
+\item[Sensor Event Thread] The sensor event thread registers
   callback listeners for all configured sensors. When sensor events
   occur, the received values are serialized in the ssf
   format (cf. \ref{sec:ssf}) and pushed onto the SensorQueue.
-\item {\bf SensorQueue}. The sensor queue is a synchronized queue
+\item[SensorQueue] The sensor queue is a synchronized queue
   object that stores sensor values as strings.
-\item {\bf DispatcherThread}. The dispatcher thread reads sensor
+\item[DispatcherThread] The dispatcher thread reads sensor
   values from the sensor queue and passes them to several services
   that can be registered. Included services are the persistor service
   and the activity recognition component, the streaming service and GPS
   publication pipeline (for use in the Service Line Detection API).
-\item {\bf Persistor}. The persistor service is executed by the
+\item[Persistor] The persistor service is executed by the
   DispatcherThread and appends the received sensor samples into a
   predefined file. Also a variant with zip-file compression is
   included.
-\item {\bf TransferThread}. The transfer thread is an independent
+\item[TransferThread] The transfer thread is an independent
   thread that transfers the persisted samples to the Live+Gov servers.
-\item {\bf Monitoring Thread}. The monitoring thread polls the
+\item[Monitoring Thread] The monitoring thread polls the
   different components and gathers run-time information like numbers
   of processed samples or the transfer state.
-\item {\bf Service Controller}. The service controller starts and
+\item[Service Controller] The service controller starts and
   stops all threads, and takes care of proper configuration of all
   services. It listens to intents specified in the API and changes the
   state of the service accordingly.
-\end{itemize}
+\end{description}
 
 The supported sensors are summarized in Table
 \ref{fig:sensor_table}. They are unchanged from D1.1.
@@ -160,34 +160,34 @@ down automatically when no services are requested. The following list
 summarizes all provided intent controls. New intents are marked with
 an asterisk (*).
 
-\begin{itemize}
-\item {\bfseries Start/Stop Recording.} Starts and stops recording of
+\begin{description}
+\item[Start/Stop Recording] Starts and stops recording of
   sensor samples. Samples are persisted in a local sensor file.
-\item {\bfseries Delete Samples.*} Delete all stored samples on the
+\item[Delete Samples*] Delete all stored samples on the
   device.
-\item {\bf Send Annotation.} This intent allows users to annotate
+\item[Send Annotation] This intent allows users to annotate
   their recording by a string value that will be recorded by a
   ``tag-sensor''.
-\item {\bfseries Enable/Disable Streaming*.} When enabled, all
+\item[Enable/Disable Streaming*] When enabled, all
   collected sensor samples are streamed over to a central server over
   the network. See section \ref{sec:straming} for more details.
-\item {\bfseries Transfer samples.}  Controls the sample transfer
+\item[Transfer samples]  Controls the sample transfer
   state machine. When enabled and a network connection is available
   sensor samples are transferred in batches to the server backend.
-\item {\bfseries Enable/Disable sample broadcast.} When enabled all
+\item[Enable/Disable sample broadcast] When enabled all
   recorded sensor samples are broadcasted in the form of intents into
   the system. This allows other components, e.g. feature extraction
   and context mining, to make use of the recorded sensor data.
-\item {\bfseries Request Status Report.} When this intent is received
+\item[Request Status Report] When this intent is received
   a status report is broadcasted to the system. A summary of returned
   information is shown in Table \ref{tab:StatusIntent}.
-\item {\bfseries Set user ID.*} Set the user id to a given value. This
+\item[Set user ID*] Set the user id to a given value. This
   intent is used to connect the mining results to the user data in the
   Live+Gov service center.
-\item {\bfseries Get GPS samples.*} Returns a summary of the latest
+\item[Get GPS samples*] Returns a summary of the latest
   GPS samples gathered by the system in ssf format. It is intended to
   be used by the service line detection service described in Section \ref{sec:SLD}.
-\end{itemize}
+\end{description}
 
 When a control intent is received by the component, the appropriate
 action is taken. After execution has finished a status report intent
@@ -230,7 +230,7 @@ The sensor stream format ({\it ssf}) which is used for transfering
 sensor values from a mobile device (or another sensor source) to the
 Server Side Storage Service (C9). The file format is inspired by the
 \href{http://en.wikipedia.org/wiki/Common\_Log\_Format}{Common Log
-  Format} used by many webservers. It replaces the XML-based format
+  Format} used by many web servers. It replaces the XML-based format
 used in D1.1. We view incoming sensor values as events and record them
 as a simple stream of CSV-rows. Each sensor has an individual prefix
 but writes into the same file.
